@@ -236,6 +236,11 @@
     background: white !important;
   }
 
+  /* Hide browser default number arrows */
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .qty-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
   /* Order summary */
   .summary-rows { display: flex; flex-direction: column; gap: 8px; }
 
@@ -364,20 +369,20 @@
     <div class="field-row field">
       <div>
         <label for="firstName">First name</label>
-        <input type="text" id="firstName" placeholder="Veeran" required>
+        <input type="text" id="firstName" placeholder="Jane" required>
       </div>
       <div>
         <label for="lastName">Last name</label>
-        <input type="text" id="lastName" placeholder="Daddy" required>
+        <input type="text" id="lastName" placeholder="Smith" required>
       </div>
     </div>
     <div class="field">
       <label for="email">Email address</label>
-      <input type="email" id="email" placeholder="daddy@hub.com" required>
+      <input type="email" id="email" placeholder="jane@example.com" required>
     </div>
     <div class="field">
       <label for="phone">Phone <span style="color:var(--ink-faint);font-weight:400">(optional)</span></label>
-      <input type="tel" id="phone" placeholder="080-3319-000">
+      <input type="tel" id="phone" placeholder="+1 555 000 0000">
     </div>
   </div>
 
