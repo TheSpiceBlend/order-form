@@ -1,0 +1,6 @@
+	
+name	"order-form"
+version	"1.0.0"
+description	"Order form with email notifications via Resend"
+dependencies	
+resend	"^3.0.0"
