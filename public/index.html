@@ -185,6 +185,14 @@
     display: block;
   }
 
+  .product-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
   .product-info { flex: 1; }
   .product-name { font-size: 14px; font-weight: 500; color: var(--ink); }
   .product-desc { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
@@ -369,20 +377,20 @@
     <div class="field-row field">
       <div>
         <label for="firstName">First name</label>
-        <input type="text" id="firstName" placeholder="Veeran" required>
+        <input type="text" id="firstName" placeholder="Jane" required>
       </div>
       <div>
         <label for="lastName">Last name</label>
-        <input type="text" id="lastName" placeholder="Daddy" required>
+        <input type="text" id="lastName" placeholder="Smith" required>
       </div>
     </div>
     <div class="field">
       <label for="email">Email address</label>
-      <input type="email" id="email" placeholder="Daddy@hub.com" required>
+      <input type="email" id="email" placeholder="jane@example.com" required>
     </div>
     <div class="field">
       <label for="phone">Phone <span style="color:var(--ink-faint);font-weight:400">(optional)</span></label>
-      <input type="tel" id="phone" placeholder="080-3319-000">
+      <input type="tel" id="phone" placeholder="+1 555 000 0000">
     </div>
   </div>
 
@@ -429,7 +437,7 @@
 
 <script>
 const PRODUCTS = [
-  { id: 'p1', name: 'Kerala Pothichoru in Original Banana Leaf', desc: 'Authentic Kerala style', price: 2000 },
+  { id: 'p1', name: 'Kerala Pothichoru in Original Banana Leaf', desc: 'Authentic Kerala style', price: 2000, img: 'https://github.com/TheSpiceBlend/order-form/blob/main/PPSpiceBlendJP.png?raw=true' },
 ];
 
 // ─── Render product items ───────────────────────────────────────────────────
@@ -440,6 +448,7 @@ PRODUCTS.forEach(p => {
   el.id = 'item-' + p.id;
   el.innerHTML = `
     <div class="product-check" id="check-${p.id}"></div>
+    ${p.img ? `<img class="product-img" src="${p.img}" alt="${p.name}">` : ''}
     <div class="product-info">
       <div class="product-name">${p.name}</div>
       <div class="product-desc">${p.desc}</div>
