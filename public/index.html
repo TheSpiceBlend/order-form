@@ -474,9 +474,91 @@
     text-align: center;
     letter-spacing: 0.05em;
   }
+
+  /* ── Password screen ── */
+  #passwordScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(74,140,92,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 80%, rgba(201,168,76,0.12) 0%, transparent 60%),
+      linear-gradient(160deg, #0f2018 0%, #1a3a2a 40%, #142d1e 100%);
+  }
+  .pw-card {
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .pw-logo { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .pw-brand { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
+  .pw-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--green-dark); margin-bottom: 0.4rem; }
+  .pw-sub { font-size: 13px; color: var(--ink-faint); margin-bottom: 1.75rem; line-height: 1.5; }
+  .pw-input-wrap { position: relative; margin-bottom: 1rem; }
+  .pw-input {
+    width: 100%;
+    padding: 12px 44px 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.12em;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .pw-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,92,0.12); }
+  .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: var(--ink-faint); padding: 4px; }
+  .pw-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(45,90,61,0.4);
+  }
+  .pw-btn:hover { transform: translateY(-1px); }
+  .pw-error { display: none; margin-top: 0.75rem; font-size: 13px; color: #993c1d; background: #fdf0ed; border: 1px solid #f5c4b3; border-radius: var(--radius); padding: 8px 12px; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+  .pw-shake { animation: shake 0.4s ease; }
+
 </style>
 </head>
 <body>
+
+<!-- Password Screen -->
+<div id="passwordScreen">
+  <div class="pw-card">
+    <div class="pw-logo">🌿</div>
+    <div class="pw-brand">The Spice Blend</div>
+    <div class="pw-title">Members Only</div>
+    <p class="pw-sub">Enter the password to access the weekly order form.</p>
+    <div class="pw-input-wrap">
+      <input class="pw-input" type="password" id="pwInput" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') checkPassword()">
+      <button class="pw-toggle" onclick="togglePwVisibility()" id="pwToggleBtn" title="Show/hide password">👁</button>
+    </div>
+    <button class="pw-btn" onclick="checkPassword()">Enter →</button>
+    <div class="pw-error" id="pwError">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
 
 <!-- Leaf SVG decorations -->
 <svg class="leaf leaf-1" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -569,6 +651,45 @@
 <div class="footer">© The Spice Blend · Authentic Kerala Cuisine</div>
 
 <script>
+
+// ─── Password Protection ─────────────────────────────────────────────────────
+const CORRECT_PASSWORD = 'spice2024'; // ← Change this to your password
+
+function checkPassword() {
+  const input = document.getElementById('pwInput').value;
+  const error = document.getElementById('pwError');
+  const card  = document.querySelector('.pw-card');
+
+  if (input === CORRECT_PASSWORD) {
+    const screen = document.getElementById('passwordScreen');
+    screen.style.transition = 'opacity 0.4s ease';
+    screen.style.opacity = '0';
+    setTimeout(() => screen.remove(), 400);
+    sessionStorage.setItem('spiceblend_auth', '1');
+  } else {
+    error.style.display = 'block';
+    card.classList.remove('pw-shake');
+    void card.offsetWidth; // reflow to restart animation
+    card.classList.add('pw-shake');
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function togglePwVisibility() {
+  const input = document.getElementById('pwInput');
+  const btn   = document.getElementById('pwToggleBtn');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem('spiceblend_auth') === '1') {
+  document.getElementById('passwordScreen').remove();
+}
+
+document.getElementById('pwInput').focus();
+
 const PRODUCTS = [
   {
     id: 'p1',
