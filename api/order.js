@@ -3,7 +3,7 @@
  * ─────────────────────────────────────────────
  * Environment variables required in Vercel dashboard:
  *   RESEND_API_KEY              → your Resend API key
- *   ADMIN_EMAIL                 → your email (order alerts)
+ *   ADMIN_EMAIL                 → one or more emails comma-separated (e.g. a@x.com,b@x.com)
  *   FROM_EMAIL                  → verified sender in Resend
  *   GOOGLE_SHEET_ID             → your Google Sheet ID
  *   GOOGLE_SERVICE_ACCOUNT_KEY  → full JSON contents of service account key
@@ -13,7 +13,8 @@ const { Resend } = require('resend');
 const { google } = require('googleapis');
 
 const resend      = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+// Support multiple admin emails separated by commas
+const ADMIN_EMAILS = (process.env.ADMIN_EMAIL || '').split(',').map(e => e.trim()).filter(Boolean);
 const FROM_EMAIL  = process.env.FROM_EMAIL;
 const SHEET_ID    = process.env.GOOGLE_SHEET_ID;
 
@@ -78,7 +79,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid order data' });
   }
 
-  if (!ADMIN_EMAIL || !FROM_EMAIL || !process.env.RESEND_API_KEY) {
+  if (!ADMIN_EMAILS.length || !FROM_EMAIL || !process.env.RESEND_API_KEY) {
     console.error('Missing environment variables');
     return res.status(500).json({ error: 'Server misconfiguration' });
   }
@@ -99,7 +100,7 @@ export default async function handler(req, res) {
     // ── 2. Alert email to YOU (the shop owner) ───────────────────────────
     await resend.emails.send({
       from: FROM_EMAIL,
-      to:   ADMIN_EMAIL,
+      to:   ADMIN_EMAILS,
       subject: `🛒 New order ${orderRef} — ¥${total} from ${customer.firstName} ${customer.lastName}`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a18">
