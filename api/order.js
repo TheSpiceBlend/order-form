@@ -151,7 +151,7 @@ export default async function handler(req, res) {
             </tr></tfoot>
           </table>
           ${notes ? `<p style="font-size:13px;color:#888">Your notes: <em>${notes}</em></p>` : ''}
-          <p style="font-size:13px;color:#aaa;margin-top:32px">Questions? Contact us at ${ADMIN_EMAIL}</p>
+
         </div>`
     });
 
