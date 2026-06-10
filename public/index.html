@@ -645,6 +645,10 @@
       <label for="phone">Phone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
       <input type="tel" id="phone" placeholder="080-0000-0000">
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+      <span id="savedHint" style="display:none;font-size:12px;color:var(--ink-faint)"></span>
+      <button onclick="forgetMe()" style="display:none;font-size:12px;color:var(--ink-faint);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0" id="forgetBtn">Clear saved details</button>
+    </div>
   </div>
 
   <!-- Products -->
@@ -778,7 +782,7 @@ const PRODUCTS = [
     id: 'p1',
     name: 'Kerala Pothichoru in Original Banana Leaf',
     desc: 'Authentic Kerala style rice meal wrapped in banana leaf',
-    price: 2000,
+    price: 100,
     img: 'https://github.com/TheSpiceBlend/order-form/blob/main/PPSpiceBlendJP.png?raw=true'
   },
   {
@@ -891,6 +895,8 @@ async function submitOrder() {
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error('Server error');
+    // Save customer details for next time
+    localStorage.setItem('spiceblend_customer', JSON.stringify({ firstName, lastName, email, phone }));
     document.getElementById('orderRef').textContent = orderRef;
     document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
     document.getElementById('successState').style.display = 'flex';
@@ -913,11 +919,7 @@ function resetForm() {
   document.getElementById('successState').style.display = 'none';
   document.querySelectorAll('.section').forEach(s => s.style.display = '');
 
-  // Clear customer fields
-  document.getElementById('firstName').value = '';
-  document.getElementById('lastName').value = '';
-  document.getElementById('email').value = '';
-  document.getElementById('phone').value = '';
+  // Keep name/email/phone, only clear notes
   document.getElementById('notes').value = '';
 
   // Deselect all products & reset quantities
@@ -939,6 +941,41 @@ function resetForm() {
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+
+// ─── Autofill saved customer details ────────────────────────────────────────
+function loadSavedCustomer() {
+  try {
+    const saved = localStorage.getItem('spiceblend_customer');
+    if (!saved) return;
+    const { firstName, lastName, email, phone } = JSON.parse(saved);
+    if (firstName) document.getElementById('firstName').value = firstName;
+    if (lastName)  document.getElementById('lastName').value  = lastName;
+    if (email)     document.getElementById('email').value     = email;
+    if (phone)     document.getElementById('phone').value     = phone;
+
+    // Show "not you?" link
+    const hint = document.getElementById('savedHint');
+    if (hint) {
+      hint.textContent = 'Details saved from last order.';
+      hint.style.display = 'block';
+      const forgetBtn = document.getElementById('forgetBtn');
+      if (forgetBtn) forgetBtn.style.display = 'inline';
+    }
+  } catch(e) {}
+}
+
+function forgetMe() {
+  localStorage.removeItem('spiceblend_customer');
+  document.getElementById('firstName').value = '';
+  document.getElementById('lastName').value  = '';
+  document.getElementById('email').value     = '';
+  document.getElementById('phone').value     = '';
+  const hint = document.getElementById('savedHint');
+  if (hint) hint.style.display = 'none';
+}
+
+loadSavedCustomer();
 
 </script>
 </body>
