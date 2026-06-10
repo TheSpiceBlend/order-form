@@ -153,6 +153,18 @@ export default async function handler(req, res) {
           </table>
           ${notes ? `<p style="font-size:13px;color:#888">Your notes: <em>${notes}</em></p>` : ''}
 
+          <!-- PayPay Payment -->
+          <div style="margin-top:28px;padding:20px;background:linear-gradient(135deg,#f7f0ff,#fff0f5);border-radius:12px;text-align:center;border:1px solid #e8d5f0">
+            <p style="font-size:13px;font-weight:600;color:#1a1a18;margin:0 0 6px">💳 Complete your payment</p>
+            <p style="font-size:12px;color:#888;margin:0 0 16px">Please pay the exact amount below via PayPay</p>
+            <div style="font-size:28px;font-weight:700;color:#1a1a18;margin-bottom:16px">¥${total}</div>
+            <a href="https://qr.paypay.ne.jp/p2p01_SezqzgnTbys0rDK8?amount=${total}"
+               style="display:inline-block;padding:14px 32px;background:#e6002d;color:white;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.02em">
+              Pay ¥${total} with PayPay →
+            </a>
+            <p style="font-size:11px;color:#aaa;margin-top:12px">Tap the button above to open PayPay and complete payment</p>
+          </div>
+
         </div>`
     });
 
