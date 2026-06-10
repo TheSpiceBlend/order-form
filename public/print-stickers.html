@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Spice Blend — Print Stickers</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-dark: #1a3a2a;
+    --green-mid: #2d5a3d;
+    --green-light: #4a8c5c;
+    --gold: #c9a84c;
+    --cream: #fdf8f0;
+    --border: #e8dcc8;
+    --ink: #1a1a18;
+    --ink-muted: #5a5a50;
+    --ink-faint: #a0a090;
+    --radius: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0ede8;
+    color: var(--ink);
+    padding: 2rem 1rem;
+  }
+
+  .page-header {
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--green-dark);
+  }
+
+  .page-subtitle { font-size: 13px; color: var(--ink-faint); margin-top: 2px; }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white;
+    box-shadow: 0 3px 10px rgba(45,90,61,0.3);
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  .btn-outline {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: var(--cream); }
+
+  .btn-danger {
+    background: #fdf0ed;
+    color: #993c1d;
+    border: 1px solid #f5c4b3;
+  }
+
+  /* Manual add form */
+  .add-form {
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .add-form h2 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus { border-color: var(--green-light); }
+
+  /* Sticker grid */
+  .sticker-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 85.6mm);
+    gap: 12px;
+    justify-content: center;
+  }
+
+  /* Sticker card — credit card size 85.6mm x 54mm */
+  .sticker {
+    width: 85.6mm;
+    height: 54mm;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 4mm 5mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+
+  .sticker:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .sticker.selected { border-color: var(--green-light); box-shadow: 0 0 0 2px rgba(74,140,92,0.3); }
+
+  .sticker::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2.5mm;
+    background: var(--green-dark);
+  }
+
+  .sticker-top {
+    padding-left: 3mm;
+  }
+
+  .sticker-brand {
+    font-size: 7px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.5mm;
+  }
+
+  .sticker-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green-dark);
+    line-height: 1.2;
+  }
+
+  .sticker-mid { padding-left: 3mm; }
+
+  .sticker-product {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 1mm;
+  }
+
+  .sticker-qty {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 500;
+    background: var(--green-dark);
+    color: white;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-bottom: 1.5mm;
+  }
+
+  .sticker-notes {
+    font-size: 8px;
+    color: var(--ink-muted);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .sticker-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-left: 3mm;
+    border-top: 0.5px solid var(--border);
+    padding-top: 1.5mm;
+  }
+
+  .sticker-ref {
+    font-size: 7px;
+    color: var(--ink-faint);
+    font-family: monospace;
+  }
+
+  .sticker-date {
+    font-size: 7px;
+    color: var(--ink-faint);
+  }
+
+  .sticker-delete {
+    position: absolute;
+    top: 3px;
+    right: 6px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--ink-faint);
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .sticker:hover .sticker-delete { opacity: 1; }
+  .sticker-delete:hover { background: #fdf0ed; color: #993c1d; }
+
+  /* Empty state */
+  .empty-state {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .empty-state h3 { font-size: 16px; font-weight: 500; margin-bottom: 0.5rem; color: var(--ink-muted); }
+  .empty-state p { font-size: 13px; color: var(--ink-faint); }
+
+  /* Print styles */
+  @media print {
+    body { background: white; padding: 0; }
+    .page-header, .add-form, .controls, .sticker-delete { display: none !important; }
+    .sticker-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 85.6mm);
+      gap: 4mm;
+      padding: 5mm;
+      max-width: 100%;
+    }
+    .sticker {
+      break-inside: avoid;
+      border: 1px solid #ccc;
+      box-shadow: none !important;
+    }
+    .sticker.selected { border-color: #ccc; box-shadow: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">🌿 Print Stickers</div>
+    <div class="page-subtitle">The Spice Blend — Order labels</div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-outline" onclick="selectAll()">Select all</button>
+    <button class="btn btn-outline" onclick="clearAll()">Clear all</button>
+    <button class="btn btn-primary" onclick="printStickers()">🖨 Print selected</button>
+  </div>
+</div>
+
+<!-- Manual add form -->
+<div class="add-form">
+  <h2>Add order</h2>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Customer name</label>
+      <input type="text" id="inName" placeholder="Arun Kumar">
+    </div>
+    <div class="form-group">
+      <label>Product</label>
+      <input type="text" id="inProduct" placeholder="Kerala Pothichoru">
+    </div>
+    <div class="form-group">
+      <label>Qty</label>
+      <input type="number" id="inQty" placeholder="1" min="1" value="1">
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <input type="text" id="inNotes" placeholder="Extra spicy…">
+    </div>
+    <button class="btn btn-primary" onclick="addSticker()" style="height:38px;white-space:nowrap">+ Add</button>
+  </div>
+</div>
+
+<!-- Sticker grid -->
+<div class="sticker-grid" id="stickerGrid"></div>
+<div class="empty-state" id="emptyState">
+  <div class="empty-state-icon">🏷️</div>
+  <h3>No stickers yet</h3>
+  <p>Add orders using the form above — or paste orders from your Google Sheet.</p>
+</div>
+
+<script>
+let stickers = JSON.parse(localStorage.getItem('spiceblend_stickers') || '[]');
+
+function save() {
+  localStorage.setItem('spiceblend_stickers', JSON.stringify(stickers));
+}
+
+function render() {
+  const grid = document.getElementById('stickerGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+
+  if (!stickers.length) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  stickers.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'sticker' + (s.selected ? ' selected' : '');
+    el.onclick = (e) => { if (!e.target.classList.contains('sticker-delete')) toggleSelect(i); };
+    el.innerHTML = `
+      <button class="sticker-delete" onclick="deleteSticker(${i})" title="Remove">✕</button>
+      <div class="sticker-top">
+        <div class="sticker-brand">The Spice Blend</div>
+        <div class="sticker-name">${s.name}</div>
+      </div>
+      <div class="sticker-mid">
+        <div class="sticker-product">${s.product}</div>
+        <span class="sticker-qty">Qty: ${s.qty}</span>
+        ${s.notes ? `<div class="sticker-notes">${s.notes}</div>` : ''}
+      </div>
+      <div class="sticker-bottom">
+        <span class="sticker-ref">${s.ref || ''}</span>
+        <span class="sticker-date">${s.date || ''}</span>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function addSticker() {
+  const name    = document.getElementById('inName').value.trim();
+  const product = document.getElementById('inProduct').value.trim();
+  const qty     = document.getElementById('inQty').value || '1';
+  const notes   = document.getElementById('inNotes').value.trim();
+
+  if (!name || !product) { alert('Please enter at least a name and product.'); return; }
+
+  stickers.push({
+    name, product, qty, notes,
+    ref: 'ORD-' + Date.now().toString(36).toUpperCase(),
+    date: new Date().toLocaleDateString('ja-JP'),
+    selected: true
+  });
+
+  save();
+  render();
+
+  document.getElementById('inName').value = '';
+  document.getElementById('inProduct').value = '';
+  document.getElementById('inQty').value = '1';
+  document.getElementById('inNotes').value = '';
+  document.getElementById('inName').focus();
+}
+
+function toggleSelect(i) {
+  stickers[i].selected = !stickers[i].selected;
+  save();
+  render();
+}
+
+function selectAll() {
+  stickers.forEach(s => s.selected = true);
+  save(); render();
+}
+
+function clearAll() {
+  stickers.forEach(s => s.selected = false);
+  save(); render();
+}
+
+function deleteSticker(i) {
+  stickers.splice(i, 1);
+  save(); render();
+}
+
+function printStickers() {
+  const selected = stickers.filter(s => s.selected);
+  if (!selected.length) { alert('Please select at least one sticker to print.'); return; }
+  const prev = [...stickers];
+  stickers = selected;
+  render();
+  window.print();
+  stickers = prev;
+  render();
+}
+
+// Enter key to add
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && ['inName','inProduct','inQty','inNotes'].includes(document.activeElement.id)) {
+    addSticker();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
