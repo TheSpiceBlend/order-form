@@ -475,6 +475,22 @@
     letter-spacing: 0.05em;
   }
 
+  .new-order-btn {
+    margin-top: 1.5rem;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(45,90,61,0.3);
+  }
+  .new-order-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,90,61,0.4); }
+
   /* ── Password screen ── */
   #passwordScreen {
     position: fixed;
@@ -591,16 +607,16 @@
     <div class="field-row field">
       <div>
         <label for="firstName">First name</label>
-        <input type="text" id="firstName" placeholder="Daddy" required>
+        <input type="text" id="firstName" placeholder="Arun" required>
       </div>
       <div>
         <label for="lastName">Last name</label>
-        <input type="text" id="lastName" placeholder="Daddy" required>
+        <input type="text" id="lastName" placeholder="Kumar" required>
       </div>
     </div>
     <div class="field">
       <label for="email">Email address</label>
-      <input type="email" id="email" placeholder="daddy@hub.com" required>
+      <input type="email" id="email" placeholder="arun@example.com" required>
     </div>
     <div class="field">
       <label for="phone">Phone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
@@ -643,6 +659,7 @@
     <div class="success-title">Order received! 🎉</div>
     <p class="success-sub">Thank you! We've sent a confirmation to your email. Your Kerala feast is on its way!</p>
     <div class="order-ref">Order reference: <strong id="orderRef"></strong></div>
+    <button class="new-order-btn" onclick="resetForm()">🛒 Place Another Order</button>
   </div>
 
 </div>
@@ -849,6 +866,40 @@ function showError(msg) {
   el.textContent = msg;
   el.style.display = 'block';
 }
+
+// ─── Reset form for new order ────────────────────────────────────────────────
+function resetForm() {
+  // Hide success, show all sections
+  document.getElementById('successState').style.display = 'none';
+  document.querySelectorAll('.section').forEach(s => s.style.display = '');
+
+  // Clear customer fields
+  document.getElementById('firstName').value = '';
+  document.getElementById('lastName').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('phone').value = '';
+  document.getElementById('notes').value = '';
+
+  // Deselect all products & reset quantities
+  PRODUCTS.forEach(p => {
+    const item = document.getElementById('item-' + p.id);
+    if (item) item.classList.remove('active');
+    const qty = document.getElementById('qtyVal-' + p.id);
+    if (qty) qty.value = 1;
+  });
+
+  // Reset summary
+  updateSummary();
+
+  // Reset button
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.textContent = '🛒 Place Order';
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 </script>
 </body>
 </html>
