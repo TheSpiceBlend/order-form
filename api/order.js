@@ -101,7 +101,7 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: FROM_EMAIL,
       to:   ADMIN_EMAILS,
-      subject: `[TEST] 🛒 New order ${orderRef} — ¥${total} from ${customer.firstName} ${customer.lastName}`,
+      subject: `🛒 New order ${orderRef} — ¥${total} from ${customer.firstName} ${customer.lastName}`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a18">
           <h2 style="font-size:20px;margin-bottom:4px">New order received</h2>
@@ -131,7 +131,7 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: FROM_EMAIL,
       to:   customer.email,
-      subject: `[TEST] Your order from The Spice Blend (${orderRef})`,
+      subject: `Your order from The Spice Blend (${orderRef})`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a18">
           <h2 style="font-size:20px;margin-bottom:4px">Thanks for your order, ${customer.firstName}!</h2>
