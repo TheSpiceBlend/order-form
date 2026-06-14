@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Spice Blend — World Cup Special</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans', sans-serif; }
+
+@keyframes fadeIn        { 0%{opacity:0} 100%{opacity:1} }
+@keyframes float         { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-12px) rotate(3deg)} }
+@keyframes pulse         { 0%,100%{transform:scale(1);opacity:0.85} 50%{transform:scale(1.08);opacity:1} }
+@keyframes shimmer       { 0%,100%{opacity:0.6} 50%{opacity:1} }
+@keyframes confetti-drop { 0%{transform:translateY(-20px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+@keyframes slide-up      { 0%{transform:translateY(24px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+@keyframes ball-roll     { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+@keyframes shake         { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+
+.shake { animation: shake 0.4s ease !important; }
+
+#bgPhoto {
+  position: fixed; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+  filter: brightness(0.42) saturate(1.3);
+  transition: opacity 0.5s ease, background-image 0.1s;
+}
+#colorTint {
+  position: fixed; inset: 0; z-index: 1;
+  transition: background 1.5s ease;
+}
+#vignette {
+  position: fixed; inset: 0; z-index: 2;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, transparent 35%, rgba(0,0,0,0.72) 100%);
+}
+#ball {
+  position: fixed; font-size: 28px; z-index: 4;
+  filter: drop-shadow(0 4px 16px rgba(255,255,255,0.6));
+  pointer-events: none; transition: none;
+  animation: pulse 1s ease-in-out infinite;
+}
+.float-flag {
+  position: fixed; z-index: 4; pointer-events: none;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.8));
+}
+#teamStrip {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 72px; z-index: 6;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(12px);
+  border-top: 2px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; overflow: hidden;
+  transition: border-color 1s;
+}
+.team-btn {
+  flex-shrink: 0; flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  cursor: pointer; height: 100%;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  border-top: 3px solid transparent;
+  transition: all 0.3s; position: relative;
+  background: transparent;
+}
+.team-btn.active { border-top-color: var(--accent); background: rgba(255,255,255,0.06); }
+.team-btn .flag { font-size: 1.6rem; line-height: 1; transition: transform 0.3s; }
+.team-btn.active .flag { transform: scale(1.2); }
+.team-btn .label { font-size: 7px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.04em; }
+.team-btn.active .label { color: white; font-weight: 600; }
+.active-dot {
+  position: absolute; bottom: 5px;
+  width: 5px; height: 5px; border-radius: 50%;
+  animation: shimmer 1s ease-in-out infinite;
+}
+
+#loginWrap {
+  position: fixed; inset: 0; bottom: 72px; z-index: 10;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+#loginCard {
+  width: 100%; max-width: 360px;
+  background: rgba(4,10,6,0.9);
+  border-radius: 20px; padding: 1.75rem 1.75rem 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: slide-up 0.5s ease forwards;
+  transition: border-color 1s, box-shadow 1s;
+}
+#teamPill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 14px; border-radius: 30px; margin-bottom: 0.8rem;
+  transition: all 0.8s;
+}
+#teamPillFlag { font-size: 1.4rem; }
+#teamPillName {
+  font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem;
+  letter-spacing: 0.1em; line-height: 1; transition: color 0.8s;
+}
+#teamPillSub { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+#colorBar {
+  height: 2px; margin: 0 0 1rem; border-radius: 2px;
+  animation: shimmer 2s ease-in-out infinite;
+  transition: background 1s;
+}
+#trophyEl { font-size: 2rem; margin-bottom: 0.3rem; animation: pulse 2s ease-in-out infinite; }
+#wcBadge {
+  display: inline-block; font-size: 9px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 20px; margin-bottom: 0.5rem;
+  transition: color 1s, border-color 1s, background 1s;
+}
+#brandTitle {
+  font-family: 'Bebas Neue', sans-serif; font-size: 2.1rem;
+  letter-spacing: 0.05em; color: white; line-height: 1; margin-bottom: 0.1rem;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8); transition: text-shadow 1s;
+}
+#brandSub  { font-size: 0.78rem; font-style: italic; margin-bottom: 0.1rem; transition: color 1s; }
+#brandDesc { font-size: 10px; color: rgba(255,255,255,0.28); margin-bottom: 1rem; }
+#divider   { width: 48px; height: 1px; margin: 0 auto 0.85rem; transition: background 1s; }
+#pwLabel   { font-size: 9px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 7px; }
+#pwWrap    { position: relative; margin-bottom: 0.75rem; }
+#pwInput   {
+  width: 100%; padding: 11px 38px 11px 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  color: white; letter-spacing: 0.15em; text-align: center;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px; outline: none; transition: border-color 0.3s;
+}
+#pwToggle  {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.3);
+}
+#loginBtn  {
+  width: 100%; padding: 13px; font-family: 'Bebas Neue', sans-serif;
+  font-size: 17px; letter-spacing: 0.1em; color: #060e08;
+  border: none; border-radius: 10px; cursor: pointer; transition: background 1s, box-shadow 1s;
+}
+#pwError   {
+  display: none; margin-top: 0.6rem; font-size: 12px; color: #ff6b6b;
+  background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.2);
+  border-radius: 6px; padding: 7px 12px;
+}
+#successMsg { display: none; color: #44ff88; font-size: 1rem; font-weight: 500; padding: 0.75rem 0; }
+#cardFooter { margin-top: 1rem; font-size: 9px; color: rgba(255,255,255,0.15); letter-spacing: 0.05em; }
+#bottomHint {
+  position: fixed; bottom: 78px; left: 0; right: 0;
+  text-align: center; font-size: 9px; color: rgba(255,255,255,0.25);
+  letter-spacing: 0.1em; text-transform: uppercase; z-index: 11;
+}
+.confetti-piece { position: fixed; z-index: 20; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div id="bgPhoto"></div>
+<div id="colorTint"></div>
+<div id="vignette"></div>
+<div id="ball">⚽</div>
+<div id="floatingFlags"></div>
+
+<div id="teamStrip"></div>
+
+<div id="loginWrap">
+  <div id="loginCard">
+    <div id="teamPill">
+      <span id="teamPillFlag"></span>
+      <div>
+        <div id="teamPillName"></div>
+        <div id="teamPillSub">TOP RANKED · WORLD CUP</div>
+      </div>
+    </div>
+    <div id="colorBar"></div>
+    <div id="trophyEl">🏆</div>
+    <div id="wcBadge">⚽ WORLD CUP SPECIAL ⚽</div>
+    <div id="brandTitle">The Spice Blend</div>
+    <div id="brandSub">Kerala Feast Collection</div>
+    <p id="brandDesc">Authentic Kerala cuisine · Weekly orders</p>
+    <div id="divider"></div>
+    <p id="pwLabel">Enter Access Code</p>
+    <div id="pwWrap">
+      <input id="pwInput" type="password" placeholder="••••••••" autocomplete="off">
+      <button id="pwToggle" onclick="togglePw()">👁</button>
+    </div>
+    <button id="loginBtn" onclick="handleLogin()">🏟 ENTER THE STADIUM</button>
+    <div id="pwError">❌ Wrong code — try again!</div>
+    <div id="successMsg">🎉 Welcome! Redirecting...</div>
+    <p id="cardFooter">© The Spice Blend · thespiceblend.com</p>
+  </div>
+</div>
+
+<div id="bottomHint">Click a flag to change theme</div>
+
+<script>
+const STADIUM_IMAGES = [
+  'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600&q=80',
+  'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&q=80',
+  'https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=1600&q=80',
+  'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1600&q=80',
+  'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1600&q=80',
+  'https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=1600&q=80',
+];
+
+const TEAMS = [
+  { flag:'🇦🇷', name:'Argentina',  color:'#74ACDF', accent:'#FFFFFF', img:0 },
+  { flag:'🇫🇷', name:'France',      color:'#003189', accent:'#ED2939', img:1 },
+  { flag:'🇧🇷', name:'Brazil',      color:'#009C3B', accent:'#FFDF00', img:2 },
+  { flag:'🇪🇸', name:'Spain',       color:'#AA151B', accent:'#F1BF00', img:3 },
+  { flag:'🇩🇪', name:'Germany',     color:'#CC0000', accent:'#FFCC00', img:4 },
+  { flag:'🇵🇹', name:'Portugal',    color:'#006600', accent:'#FF0000', img:5 },
+  { flag:'🇬🇧', name:'England',     color:'#CF091F', accent:'#FFFFFF', img:0 },
+  { flag:'🇳🇱', name:'Netherlands', color:'#FF6600', accent:'#003DA5', img:1 },
+  { flag:'🇧🇪', name:'Belgium',     color:'#EF3340', accent:'#FDDA24', img:2 },
+  { flag:'🇭🇷', name:'Croatia',     color:'#FF0000', accent:'#0032A0', img:3 },
+  { flag:'🇯🇵', name:'Japan',       color:'#BC002D', accent:'#FFFFFF', img:4 },
+  { flag:'🇲🇦', name:'Morocco',     color:'#006233', accent:'#C1272D', img:5 },
+  { flag:'🇺🇾', name:'Uruguay',     color:'#5EB6E4', accent:'#FFFFFF', img:0 },
+  { flag:'🇲🇽', name:'Mexico',      color:'#006847', accent:'#CE1126', img:1 },
+  { flag:'🇸🇳', name:'Senegal',     color:'#00853F', accent:'#FDEF42', img:2 },
+  { flag:'🇺🇸', name:'USA',         color:'#B22234', accent:'#3C3B6E', img:3 },
+];
+
+const OTHER_FLAGS = ['🇰🇷','🇦🇺','🇨🇦','🇵🇱','🇩🇰','🇸🇪','🇨🇭','🇬🇭','🇨🇲','🇹🇳','🇶🇦','🇸🇦','🇮🇷','🇨🇴','🇮🇹','🇯🇲'];
+
+let active = TEAMS[0];
+let tick = 0;
+let autoCycleTimer;
+
+// ── Render team strip ──────────────────────────────────────────────────────
+const strip = document.getElementById('teamStrip');
+TEAMS.forEach((team, i) => {
+  const btn = document.createElement('div');
+  btn.className = 'team-btn' + (i === 0 ? ' active' : '');
+  btn.id = 'tbtn-' + i;
+  btn.style.setProperty('--accent', team.accent);
+  btn.innerHTML = `
+    <span class="flag">${team.flag}</span>
+    <span class="label">${team.name.length > 7 ? team.name.slice(0,6)+'…' : team.name}</span>
+    ${i === 0 ? `<div class="active-dot" style="background:${team.accent};box-shadow:0 0 8px ${team.accent}"></div>` : ''}
+  `;
+  btn.onclick = () => switchTeam(i);
+  strip.appendChild(btn);
+});
+
+// ── Floating other flags ───────────────────────────────────────────────────
+const flagContainer = document.getElementById('floatingFlags');
+OTHER_FLAGS.forEach((f, i) => {
+  const el = document.createElement('div');
+  el.className = 'float-flag';
+  el.textContent = f;
+  el.style.cssText = `
+    font-size:${1.1 + (i*7%10)/10*0.8}rem;
+    left:${(i*6.1+3)%92}%;
+    top:${18+(i*8.3+5)%65}%;
+    animation:float ${3+i%4}s ${(i*0.22)%3}s ease-in-out infinite;
+    opacity:0.7;
+  `;
+  flagContainer.appendChild(el);
+});
+
+// ── Switch team ────────────────────────────────────────────────────────────
+function switchTeam(idx) {
+  clearInterval(autoCycleTimer);
+  const team = TEAMS[idx];
+  const bg = document.getElementById('bgPhoto');
+  bg.style.opacity = '0';
+  setTimeout(() => {
+    active = team;
+    bg.style.backgroundImage = `url(${STADIUM_IMAGES[team.img]})`;
+    bg.style.opacity = '1';
+    applyTeamColors(team);
+    updateActiveBtn(idx);
+    startAutoCycle();
+  }, 450);
+}
+
+function applyTeamColors(team) {
+  document.getElementById('colorTint').style.background =
+    `radial-gradient(ellipse 80% 60% at 50% 100%,${team.color}22 0%,transparent 70%)`;
+  document.getElementById('teamPillFlag').textContent = team.flag;
+  document.getElementById('teamPillName').textContent = team.name;
+  document.getElementById('teamPillName').style.color = team.color;
+  document.getElementById('teamPillName').style.textShadow = `0 0 16px ${team.color}`;
+  document.getElementById('teamPill').style.background = `${team.color}22`;
+  document.getElementById('teamPill').style.border = `1px solid ${team.color}55`;
+  document.getElementById('colorBar').style.background =
+    `linear-gradient(90deg,transparent,${team.color},${team.accent},${team.color},transparent)`;
+  document.getElementById('trophyEl').style.filter = `drop-shadow(0 0 20px ${team.color}88)`;
+  document.getElementById('wcBadge').style.color = team.color;
+  document.getElementById('wcBadge').style.border = `1px solid ${team.color}44`;
+  document.getElementById('wcBadge').style.background = `${team.color}0f`;
+  document.getElementById('brandTitle').style.textShadow = `0 0 30px ${team.color}55, 0 2px 10px rgba(0,0,0,0.8)`;
+  document.getElementById('brandSub').style.color = `${team.color}cc`;
+  document.getElementById('divider').style.background =
+    `linear-gradient(90deg,transparent,${team.color},transparent)`;
+  document.getElementById('pwInput').style.border = `1px solid ${team.color}55`;
+  document.getElementById('loginCard').style.borderColor = `${team.color}66`;
+  document.getElementById('loginCard').style.boxShadow =
+    `0 0 0 1px ${team.color}22, 0 0 50px ${team.color}22, 0 24px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)`;
+  document.getElementById('loginBtn').style.background =
+    `linear-gradient(135deg,${team.color} 0%,${team.accent} 100%)`;
+  document.getElementById('loginBtn').style.boxShadow = `0 4px 24px ${team.color}55`;
+  document.getElementById('teamStrip').style.borderTopColor = `${team.color}55`;
+}
+
+function updateActiveBtn(idx) {
+  document.querySelectorAll('.team-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === idx);
+    const dot = btn.querySelector('.active-dot');
+    if (dot) dot.remove();
+    if (i === idx) {
+      const d = document.createElement('div');
+      d.className = 'active-dot';
+      d.style.cssText = `background:${TEAMS[idx].accent};box-shadow:0 0 8px ${TEAMS[idx].accent}`;
+      btn.appendChild(d);
+    }
+  });
+}
+
+// ── Auto cycle ─────────────────────────────────────────────────────────────
+function startAutoCycle() {
+  autoCycleTimer = setInterval(() => {
+    const nextIdx = (TEAMS.indexOf(active) + 1) % TEAMS.length;
+    switchTeam(nextIdx);
+  }, 5000);
+}
+
+// ── Animate football ───────────────────────────────────────────────────────
+const ball = document.getElementById('ball');
+function animateBall() {
+  tick++;
+  const x = 8 + ((tick * 0.32) % 84);
+  const y = 8 + Math.abs(Math.sin((tick * 0.32 * Math.PI) / 84)) * 18;
+  ball.style.left  = x + '%';
+  ball.style.bottom= y + '%';
+  ball.style.transform = `rotate(${tick * 5}deg)`;
+  requestAnimationFrame(animateBall);
+}
+requestAnimationFrame(animateBall);
+
+// ── Password ───────────────────────────────────────────────────────────────
+function togglePw() {
+  const inp = document.getElementById('pwInput');
+  const btn = document.getElementById('pwToggle');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+document.getElementById('pwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+  document.getElementById('pwError').style.display = 'none';
+  document.getElementById('pwInput').style.border = `1px solid ${active.color}55`;
+});
+
+async function handleLogin() {
+  const pw  = document.getElementById('pwInput').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('pwError');
+  const card= document.getElementById('loginCard');
+  if (!pw) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ CHECKING...';
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (res.ok) {
+      const { token } = await res.json();
+      sessionStorage.setItem('spiceblend_token', token);
+      launchConfetti();
+      document.getElementById('trophyEl').textContent = '🎊';
+      document.getElementById('pwWrap').style.display = 'none';
+      btn.style.display = 'none';
+      document.getElementById('pwLabel').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+      setTimeout(() => window.location.href = '/', 1500);
+    } else {
+      err.style.display = 'block';
+      document.getElementById('pwInput').style.border = '1px solid rgba(255,80,80,0.7)';
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+      btn.disabled = false;
+      btn.textContent = '🏟 ENTER THE STADIUM';
+    }
+  } catch(e) {
+    err.textContent = '⚠️ Connection error. Try again.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '🏟 ENTER THE STADIUM';
+  }
+}
+
+function launchConfetti() {
+  const colors = [active.color, active.accent, '#f0c040','#fff','#44ff88','#ff6b6b'];
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    const size = 5 + Math.random() * 12;
+    c.style.cssText = `
+      left:${Math.random()*100}%;top:-20px;
+      width:${size}px;height:${size}px;
+      background:${colors[i%6]};
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation:confetti-drop ${1.2+Math.random()}s ${Math.random()*0.8}s ease-in forwards;
+    `;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2500);
+  }
+}
+
+// ── Auto-redirect if already authenticated ─────────────────────────────────
+if (sessionStorage.getItem('spiceblend_token')) {
+  window.location.href = '/';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.getElementById('bgPhoto').style.backgroundImage = `url(${STADIUM_IMAGES[0]})`;
+applyTeamColors(TEAMS[0]);
+document.getElementById('pwInput').focus();
+startAutoCycle();
+</script>
+</body>
+</html>
