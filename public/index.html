@@ -577,6 +577,36 @@
   @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
   .pw-shake { animation: shake 0.4s ease; }
 
+
+  /* ── Sold out ── */
+  .product-item.sold-out {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: #f9f9f7;
+  }
+  .product-item.sold-out::before { display: none; }
+  .product-item.sold-out .product-check {
+    background: #e8e8e4;
+    border-color: #d0cfc8;
+  }
+  .product-item.sold-out .product-img { filter: grayscale(60%); }
+  .sold-out-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #993c1d;
+    background: #fdf0ed;
+    border: 1px solid #f5c4b3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  .product-item.sold-out .product-price {
+    text-decoration: line-through;
+    color: var(--ink-faint);
+  }
 </style>
 </head>
 <body>
@@ -783,43 +813,46 @@ const PRODUCTS = [
     name: 'Kerala Non-Veg Pothichoru in Original Banana Leaf',
     desc: 'Authentic Kerala style rice meal wrapped in banana leaf',
     price: 2150,
-    img: 'https://github.com/TheSpiceBlend/order-form/blob/main/PPSpiceBlendJP.png?raw=true'
+    img: 'https://github.com/TheSpiceBlend/order-form/blob/main/PPSpiceBlendJP.png?raw=true',
+    soldOut: false  // ← Change to true to mark as sold out
   },
   {
     id: 'p2',
     name: 'Kerala Beef Fry',
     desc: 'Slow-cooked spicy Kerala style beef with roasted coconut',
     price: 1500,
-    img: 'https://github.com/TheSpiceBlend/order-form/blob/main/SpiceBBeef.jpg?raw=true'
+    img: 'https://github.com/TheSpiceBlend/order-form/blob/main/SpiceBBeef.jpg?raw=true',
+    soldOut: false  // ← Change to true to mark as sold out
   },
 ];
 
 const grid = document.getElementById('productsGrid');
 PRODUCTS.forEach(p => {
   const el = document.createElement('div');
-  el.className = 'product-item';
+  el.className = 'product-item' + (p.soldOut ? ' sold-out' : '');
   el.id = 'item-' + p.id;
   el.innerHTML = `
     <div class="product-check" id="check-${p.id}"></div>
     ${p.img
-      ? `<img class="product-img" src="${p.img}" alt="${p.name}">`
+      ? `<img class="product-img" src="${p.img}" alt="${p.name}" ${p.soldOut ? 'style="filter:grayscale(60%)"' : ''}>`
       : `<div class="product-img-placeholder">🍖</div>`
     }
     <div class="product-info">
       <div class="product-name">${p.name}</div>
       <div class="product-desc">${p.desc}</div>
+      ${p.soldOut ? '<span class="sold-out-badge">Sold Out</span>' : ''}
     </div>
     <div class="product-right">
       <div class="product-price">¥${p.price.toLocaleString()}</div>
-      <div class="qty-wrapper" id="qty-${p.id}">
+      ${!p.soldOut ? `<div class="qty-wrapper" id="qty-${p.id}">
         <button class="qty-btn" onclick="changeQty('${p.id}',-1,event)">−</button>
         <input class="qty-input" type="number" min="1" max="99" value="1"
                id="qtyVal-${p.id}" oninput="updateSummary()" onclick="event.stopPropagation()">
         <button class="qty-btn" onclick="changeQty('${p.id}',1,event)">+</button>
-      </div>
+      </div>` : ''}
     </div>
   `;
-  el.addEventListener('click', () => toggleProduct(p.id));
+  if (!p.soldOut) el.addEventListener('click', () => toggleProduct(p.id));
   grid.appendChild(el);
 });
 
@@ -837,7 +870,7 @@ function changeQty(id, delta, e) {
 
 function getSelectedProducts() {
   return PRODUCTS
-    .filter(p => document.getElementById('item-' + p.id).classList.contains('active'))
+    .filter(p => !p.soldOut && document.getElementById('item-' + p.id).classList.contains('active'))
     .map(p => ({ ...p, qty: parseInt(document.getElementById('qtyVal-' + p.id).value) || 1 }));
 }
 
@@ -926,8 +959,10 @@ function resetForm() {
   PRODUCTS.forEach(p => {
     const item = document.getElementById('item-' + p.id);
     if (item) item.classList.remove('active');
-    const qty = document.getElementById('qtyVal-' + p.id);
-    if (qty) qty.value = 1;
+    if (!p.soldOut) {
+      const qty = document.getElementById('qtyVal-' + p.id);
+      if (qty) qty.value = 1;
+    }
   });
 
   // Reset summary
