@@ -831,10 +831,12 @@ function togglePwVisibility() {
 
 // Auto-unlock if already authenticated this session
 if (sessionStorage.getItem('spiceblend_token')) {
-  document.getElementById('passwordScreen').remove();
+  const screen = document.getElementById('passwordScreen');
+  if (screen) screen.remove();
 }
 
-document.getElementById('pwInput').focus();
+const pwInputEl = document.getElementById('pwInput');
+if (pwInputEl) pwInputEl.focus();
 
 const PRODUCTS = [
   {
