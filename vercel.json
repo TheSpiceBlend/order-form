@@ -1,15 +1,17 @@
 {
   "version": 2,
   "builds": [
-    { "src": "public/index.html", "use": "@vercel/static" },
     { "src": "public/login.html", "use": "@vercel/static" },
+    { "src": "public/index.html", "use": "@vercel/static" },
     { "src": "public/print-stickers.html", "use": "@vercel/static" },
     { "src": "api/order.js", "use": "@vercel/node" },
-    { "src": "api/auth.js", "use": "@vercel/node" }
+    { "src": "api/auth.js", "use": "@vercel/node" },
+    { "src": "api/access-request.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/auth", "dest": "/api/auth.js" },
     { "src": "/api/order", "dest": "/api/order.js" },
+    { "src": "/api/access-request", "dest": "/api/access-request.js" },
     { "src": "/login", "dest": "/public/login.html" },
     { "src": "/print-stickers", "dest": "/public/print-stickers.html" },
     { "src": "/(.*)", "dest": "/public/index.html" }
