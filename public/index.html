@@ -224,6 +224,7 @@
     user-select: none;
     position: relative;
     overflow: hidden;
+    flex-wrap: wrap;
   }
 
   .product-item::before {
@@ -356,6 +357,34 @@
   .qty-input::-webkit-outer-spin-button,
   .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .qty-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+  /* ── Mobile fix: prevent product card from collapsing into a narrow column ── */
+  @media (max-width: 420px) {
+    .product-item {
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .product-check { order: 1; }
+    .product-img,
+    .product-img-placeholder { order: 2; }
+    .product-info {
+      order: 3;
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100%;
+      margin-top: 10px;
+    }
+    .product-right {
+      order: 4;
+      flex: 1 1 100%;
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .product-name { font-size: 15px; }
+  }
 
   /* ── Summary ── */
   .summary-rows { display: flex; flex-direction: column; gap: 8px; }
@@ -818,7 +847,7 @@ const PRODUCTS = [
   },
   {
     id: 'p2',
-    name: 'Kerala Beef Fry',
+    name: 'Kerala Beef Roast',
     desc: 'Slow-cooked spicy Kerala style beef with roasted coconut',
     price: 1500,
     img: 'https://github.com/TheSpiceBlend/order-form/blob/main/beef_fry_2.JPG?raw=true',
