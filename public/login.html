@@ -150,6 +150,92 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans'
   text-align: center; font-size: 9px; color: rgba(255,255,255,0.25);
   letter-spacing: 0.1em; text-transform: uppercase; z-index: 11;
 }
+#requestAccessLink {
+  position: fixed; bottom: 92px; left: 0; right: 0; z-index: 12;
+  text-align: center;
+  display: flex; justify-content: center;
+}
+#requestAccessLink .ra-pill {
+  font-size: 11px; color: rgba(255,255,255,0.65);
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(240,192,64,0.2);
+}
+#requestAccessLink span {
+  color: #f0c040; text-decoration: underline; cursor: pointer; font-weight: 500;
+}
+#requestAccessLink span:hover { color: #ffd966; }
+
+#accessModalBackdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  padding: 1rem;
+}
+#accessModalBackdrop.open { display: flex; }
+
+#accessModal {
+  width: 100%; max-width: 340px;
+  background: rgba(8,18,12,0.97);
+  border: 1px solid rgba(240,192,64,0.4);
+  border-radius: 18px;
+  padding: 1.5rem 1.5rem 1.25rem;
+  box-shadow: 0 0 0 1px rgba(240,192,64,0.1), 0 24px 70px rgba(0,0,0,0.8);
+  position: relative;
+  font-family: 'DM Sans', sans-serif;
+  animation: slide-up 0.3s ease forwards;
+}
+#accessModalClose {
+  position: absolute; top: 12px; right: 12px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: none;
+  color: rgba(255,255,255,0.5); font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+#accessModal .am-icon { font-size: 1.8rem; text-align: center; margin-bottom: 0.5rem; }
+#accessModal .am-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 0.04em;
+  color: white; text-align: center; margin-bottom: 0.3rem;
+}
+#accessModal .am-sub {
+  font-size: 12px; color: rgba(255,255,255,0.45);
+  text-align: center; margin-bottom: 1.1rem; line-height: 1.5;
+}
+#accessModal label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); margin-bottom: 6px; display: block;
+}
+#accessModal input, #accessModal textarea {
+  width: 100%; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: white; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(240,192,64,0.25); border-radius: 8px;
+  outline: none; margin-bottom: 12px; box-sizing: border-box;
+}
+#accessModal input::placeholder, #accessModal textarea::placeholder { color: rgba(255,255,255,0.25); }
+#accessModal textarea { resize: none; height: 56px; font-family: inherit; }
+#accessSubmitBtn {
+  width: 100%; padding: 12px; font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px; letter-spacing: 0.08em; color: #060e08;
+  background: linear-gradient(135deg,#f0c040 0%,#e0a820 100%);
+  border: none; border-radius: 8px; margin-top: 4px;
+  box-shadow: 0 4px 20px rgba(240,192,64,0.35); cursor: pointer;
+}
+#accessSubmitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+#accessModal .am-footer-note {
+  font-size: 10px; color: rgba(255,255,255,0.25); text-align: center;
+  margin-top: 0.85rem; line-height: 1.4;
+}
+#accessModal .am-error {
+  display: none; font-size: 12px; color: #ff6b6b;
+  background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.2);
+  border-radius: 6px; padding: 7px 12px; margin-bottom: 10px;
+}
+#accessModal .am-success { display: none; text-align: center; color: #44ff88; font-size: 14px; padding: 1rem 0; }
 .confetti-piece { position: fixed; z-index: 20; pointer-events: none; }
 </style>
 </head>
@@ -191,7 +277,36 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans'
   </div>
 </div>
 
+<div id="requestAccessLink"><span class="ra-pill">Don't have a password? <span onclick="openAccessModal()">Request access →</span></span></div>
+
 <div id="bottomHint">Click a flag to change theme</div>
+
+<div id="accessModalBackdrop" onclick="if(event.target===this) closeAccessModal()">
+  <div id="accessModal">
+    <button id="accessModalClose" onclick="closeAccessModal()">✕</button>
+    <div class="am-icon">🔑</div>
+    <div class="am-title">Request Access</div>
+    <div class="am-sub">Fill in your details and we'll send you access to The Spice Blend ordering page.</div>
+
+    <div class="am-error" id="amError"></div>
+
+    <div id="amFormFields">
+      <label>Your Name</label>
+      <input type="text" id="amName" placeholder="e.g. Hiroshi Tanaka">
+
+      <label>Email Address</label>
+      <input type="email" id="amEmail" placeholder="e.g. you@example.com">
+
+      <label>Message <span style="opacity:0.6">(optional)</span></label>
+      <textarea id="amMessage" placeholder="How did you hear about us?"></textarea>
+
+      <button id="accessSubmitBtn" onclick="submitAccessRequest()">📨 Send Request</button>
+      <div class="am-footer-note">We'll review your request and email you the access details soon.</div>
+    </div>
+
+    <div class="am-success" id="amSuccess">✅ Request sent! We'll be in touch soon.</div>
+  </div>
+</div>
 
 <script>
 const STADIUM_IMAGES = [
@@ -428,6 +543,63 @@ document.getElementById('bgPhoto').style.backgroundImage = `url(${STADIUM_IMAGES
 applyTeamColors(TEAMS[0]);
 document.getElementById('pwInput').focus();
 startAutoCycle();
+
+// ── Access request modal ───────────────────────────────────────────────────
+function openAccessModal() {
+  document.getElementById('accessModalBackdrop').classList.add('open');
+  document.getElementById('amError').style.display = 'none';
+  document.getElementById('amFormFields').style.display = 'block';
+  document.getElementById('amSuccess').style.display = 'none';
+  document.getElementById('amName').focus();
+}
+
+function closeAccessModal() {
+  document.getElementById('accessModalBackdrop').classList.remove('open');
+}
+
+async function submitAccessRequest() {
+  const name    = document.getElementById('amName').value.trim();
+  const email   = document.getElementById('amEmail').value.trim();
+  const message = document.getElementById('amMessage').value.trim();
+  const errEl   = document.getElementById('amError');
+  const btn     = document.getElementById('accessSubmitBtn');
+
+  errEl.style.display = 'none';
+
+  if (!name || !email) {
+    errEl.textContent = 'Please fill in your name and email.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending...';
+
+  try {
+    const res = await fetch('/api/access-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, message })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      document.getElementById('amFormFields').style.display = 'none';
+      document.getElementById('amSuccess').style.display = 'block';
+      setTimeout(closeAccessModal, 2500);
+    } else {
+      errEl.textContent = data.error || 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '📨 Send Request';
+    }
+  } catch (e) {
+    errEl.textContent = '⚠️ Connection error. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '📨 Send Request';
+  }
+}
 </script>
 </body>
 </html>
