@@ -102,6 +102,57 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans'
 #accessModal .am-footer-note { font-size:10px;color:rgba(255,255,255,0.25);text-align:center;margin-top:0.85rem;line-height:1.4; }
 
 .confetti-piece { position:fixed;z-index:20;pointer-events:none; }
+
+/* ── Scrolling photo cards ── */
+#photoStrip {
+  position: fixed;
+  bottom: 28%;
+  left: 0; right: 0;
+  height: 145px;
+  z-index: 4;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+  pointer-events: none;
+}
+#photoStripInner {
+  display: flex;
+  gap: 12px;
+  height: 100%;
+  align-items: center;
+  will-change: transform;
+}
+.photo-card {
+  flex-shrink: 0;
+  width: 118px;
+  height: 125px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid rgba(255,200,0,0.5);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px rgba(255,200,0,0.2);
+  transition: border-color 1s, box-shadow 1s;
+}
+.photo-card img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.photo-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.75) 100%);
+}
+.photo-card-label {
+  position: absolute; bottom: 6px; left: 6px; right: 6px;
+  font-size: 9px; font-weight: 600; color: white;
+  letter-spacing: 0.05em; text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  font-family: 'DM Sans', sans-serif;
+}
+.photo-card-top {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  transition: background 1s;
+}
+
+
 </style>
 </head>
 <body>
@@ -154,7 +205,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans'
 
 <div id="ball">⚽</div>
 
-<div id="celebPlayer">
+<div id="celebPlayer" style="display:none">
   <svg viewBox="0 0 80 110" fill="none">
     <ellipse cx="40" cy="13" rx="11" ry="11" fill="#ffe44a" opacity="0.9"/>
     <path d="M29 24 Q27 52 25 72 L33 72 Q37 53 40 43 Q43 53 47 72 L55 72 Q53 52 51 24Z" fill="#ffe44a" opacity="0.85"/>
@@ -170,18 +221,272 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'DM Sans'
 
 <div id="ticker">
   <div id="tickerInner">
-    <span class="ticker-dot">★</span><span class="ticker-item">🇲🇽 Mexico leads Group A — 9 pts, perfect record!</span>
-    <span class="ticker-dot">⚽</span><span class="ticker-item">🇫🇷 France tops Group I — 9 pts, Les Bleus on fire!</span>
-    <span class="ticker-dot">★</span><span class="ticker-item">🇦🇷 Argentina dominate Group J — 9 pts, 3 wins!</span>
-    <span class="ticker-dot">⚽</span><span class="ticker-item">🇧🇷 Brazil through from Group C — 7 pts</span>
-    <span class="ticker-dot">★</span><span class="ticker-item">🇨🇭 Switzerland strong in Group B — 7 pts</span>
-    <span class="ticker-dot">⚽</span><span class="ticker-item">🇳🇱 Netherlands lead Group F — 7 pts</span>
-    <span class="ticker-dot">★</span><span class="ticker-item">🇪🇸 Spain top Group H — 7 pts</span>
-    <span class="ticker-dot">⚽</span><span class="ticker-item">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England through from Group L — 7 pts</span>
+    <span class="ticker-dot">★</span><span class="ticker-item">🇲🇽 Mexico — Group A leaders! Perfect 3 wins, 9 pts 🔥</span>
+    <span class="ticker-dot">⚽</span><span class="ticker-item">🇫🇷 France — Group I leaders! 3 wins, 9 pts — Les Bleus unstoppable!</span>
+    <span class="ticker-dot">★</span><span class="ticker-item">🇦🇷 Argentina — Group J leaders! 3 wins, 9 pts — Albiceleste on fire!</span>
+    <span class="ticker-dot">⚽</span><span class="ticker-item">🇧🇷 Brazil & 🇲🇦 Morocco tied at top of Group C — 7 pts each!</span>
+    <span class="ticker-dot">★</span><span class="ticker-item">🇨🇭 Switzerland lead Group B — 7 pts</span>
+    <span class="ticker-dot">⚽</span><span class="ticker-item">🇳🇱 Netherlands lead Group F — 7 pts · 🇯🇵 Japan in 2nd with 5 pts!</span>
+    <span class="ticker-dot">★</span><span class="ticker-item">🇪🇸 Spain lead Group H — 7 pts</span>
+    <span class="ticker-dot">⚽</span><span class="ticker-item">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England lead Group L — 7 pts</span>
+    <span class="ticker-dot">★</span><span class="ticker-item">🇨🇴 Colombia lead Group K — 7 pts · 🇵🇹 Portugal in 2nd!</span>
+    <span class="ticker-dot">⚽</span><span class="ticker-item">🇩🇪 Germany & 🇺🇸 USA both on 6 pts — Round of 32 heating up!</span>
     <span class="ticker-dot">★</span><span class="ticker-item">🌿 The Spice Blend · Authentic Kerala cuisine · Order now!</span>
   </div>
 </div>
 
+
+
+<div id="photoStrip"><div id="photoStripInner">
+  <div class="photo-card" style="background:#1a3a2a">
+    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&q=80&auto=format" alt="🏟 Stadium" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a3a2a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🏟 Stadium</div>
+  </div>
+  <div class="photo-card" style="background:#0d2515">
+    <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&q=80&auto=format" alt="⚽ Night Match" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#0d2515'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">⚽ Night Match</div>
+  </div>
+  <div class="photo-card" style="background:#1a2a3a">
+    <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&q=80&auto=format" alt="🌟 Game Day" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a2a3a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🌟 Game Day</div>
+  </div>
+  <div class="photo-card" style="background:#2a1a0d">
+    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&q=80&auto=format" alt="🔥 Pitch Side" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#2a1a0d'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🔥 Pitch Side</div>
+  </div>
+  <div class="photo-card" style="background:#0d1a2a">
+    <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=400&q=80&auto=format" alt="🏆 World Cup" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#0d1a2a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🏆 World Cup</div>
+  </div>
+  <div class="photo-card" style="background:#1a2a1a">
+    <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=400&q=80&auto=format" alt="⚡ On the Pitch" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a2a1a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">⚡ On the Pitch</div>
+  </div>
+  <div class="photo-card" style="background:#1a3a2a">
+    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&q=80&auto=format" alt="🏟 Stadium" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a3a2a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🏟 Stadium</div>
+  </div>
+  <div class="photo-card" style="background:#0d2515">
+    <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&q=80&auto=format" alt="⚽ Night Match" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#0d2515'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">⚽ Night Match</div>
+  </div>
+  <div class="photo-card" style="background:#1a2a3a">
+    <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&q=80&auto=format" alt="🌟 Game Day" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a2a3a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🌟 Game Day</div>
+  </div>
+  <div class="photo-card" style="background:#2a1a0d">
+    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&q=80&auto=format" alt="🔥 Pitch Side" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#2a1a0d'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🔥 Pitch Side</div>
+  </div>
+  <div class="photo-card" style="background:#0d1a2a">
+    <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=400&q=80&auto=format" alt="🏆 World Cup" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#0d1a2a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🏆 World Cup</div>
+  </div>
+  <div class="photo-card" style="background:#1a2a1a">
+    <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=400&q=80&auto=format" alt="⚡ On the Pitch" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a2a1a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">⚡ On the Pitch</div>
+  </div>
+  <div class="photo-card" style="background:#1a3a2a">
+    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&q=80&auto=format" alt="🏟 Stadium" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a3a2a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🏟 Stadium</div>
+  </div>
+  <div class="photo-card" style="background:#0d2515">
+    <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&q=80&auto=format" alt="⚽ Night Match" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#0d2515'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">⚽ Night Match</div>
+  </div>
+  <div class="photo-card" style="background:#1a2a3a">
+    <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&q=80&auto=format" alt="🌟 Game Day" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a2a3a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🌟 Game Day</div>
+  </div>
+  <div class="photo-card" style="background:#2a1a0d">
+    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&q=80&auto=format" alt="🔥 Pitch Side" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#2a1a0d'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🔥 Pitch Side</div>
+  </div>
+  <div class="photo-card" style="background:#0d1a2a">
+    <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=400&q=80&auto=format" alt="🏆 World Cup" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#0d1a2a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">🏆 World Cup</div>
+  </div>
+  <div class="photo-card" style="background:#1a2a1a">
+    <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=400&q=80&auto=format" alt="⚡ On the Pitch" loading="lazy"
+      onerror="this.style.display='none';this.parentElement.style.background='#1a2a1a'"
+      onload="this.parentElement.style.background='transparent'"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top"></div>
+    <div class="photo-card-label">⚡ On the Pitch</div>
+  </div>
+</div></div>
+
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=300&q=80" alt="🏟 Night Match" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🏟 Night Match</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&q=80" alt="🌟 Match Day" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🌟 Match Day</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&q=80" alt="🔥 Stadium Lights" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🔥 Stadium Lights</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=300&q=80" alt="⚡ Pitch Side" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">⚡ Pitch Side</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=300&q=80" alt="🏆 World Cup" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🏆 World Cup</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1473976345543-9ffc928e648d?w=300&q=80" alt="⚽ Wembley Stadium" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">⚽ Wembley Stadium</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=300&q=80" alt="🏟 Night Match" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🏟 Night Match</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&q=80" alt="🌟 Match Day" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🌟 Match Day</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&q=80" alt="🔥 Stadium Lights" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🔥 Stadium Lights</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=300&q=80" alt="⚡ Pitch Side" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">⚡ Pitch Side</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=300&q=80" alt="🏆 World Cup" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🏆 World Cup</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1473976345543-9ffc928e648d?w=300&q=80" alt="⚽ Wembley Stadium" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">⚽ Wembley Stadium</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=300&q=80" alt="🏟 Night Match" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🏟 Night Match</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=300&q=80" alt="🌟 Match Day" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🌟 Match Day</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&q=80" alt="🔥 Stadium Lights" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🔥 Stadium Lights</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=300&q=80" alt="⚡ Pitch Side" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">⚡ Pitch Side</div>
+  </div>
+  <div class="photo-card">
+    <img src="https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=300&q=80" alt="🏆 World Cup" loading="lazy"/>
+    <div class="photo-card-overlay"></div>
+    <div class="photo-card-top" id="cardTop"></div>
+    <div class="photo-card-label">🏆 World Cup</div>
+  </div>
+</div></div>
 <div id="loginWrap">
   <div id="loginCard">
     <div class="card-active-team">
@@ -247,7 +552,7 @@ const TOP8 = [
   { flag:'🇲🇽', name:'Mexico',      pts:9, color:'#00a859', accent:'#CE1126', img:0 },
   { flag:'🇫🇷', name:'France',      pts:9, color:'#4169e1', accent:'#ED2939', img:1 },
   { flag:'🇦🇷', name:'Argentina',   pts:9, color:'#74ACDF', accent:'#f0c040', img:2 },
-  { flag:'🇧🇷', name:'Brazil',      pts:7, color:'#00a859', accent:'#FFDF00', img:3 },
+  { flag:'🇧🇷', name:'Brazil',      pts:7, color:'#009C3B', accent:'#FFDF00', img:3 },
   { flag:'🇨🇭', name:'Switzerland', pts:7, color:'#FF3333', accent:'#FFFFFF', img:4 },
   { flag:'🇳🇱', name:'Netherlands', pts:7, color:'#FF6600', accent:'#003DA5', img:5 },
   { flag:'🇪🇸', name:'Spain',       pts:7, color:'#c60b1e', accent:'#F1BF00', img:0 },
@@ -299,6 +604,7 @@ function applyTeamColors(team) {
   document.getElementById('loginBtn').style.background=btnBg;
   document.getElementById('loginBtn').style.color=[team.color,team.accent].some(c=>c==='#FFFFFF'||c==='#FFDF00'||c==='#F1BF00'||c==='#f0c040')?'#050e08':'white';
   document.getElementById('pwInput').style.borderColor=`${team.color==='#FFFFFF'?'rgba(255,200,0,0.4)':team.color+'55'}`;
+  updateCardColors(team);
 }
 
 function startAutoCycle() {
@@ -382,6 +688,33 @@ async function submitAccessRequest(){
     else{errEl.textContent=data.error||'Something went wrong.';errEl.style.display='block';btn.disabled=false;btn.textContent='📨 Send Request';}
   }catch(e){errEl.textContent='⚠️ Connection error.';errEl.style.display='block';btn.disabled=false;btn.textContent='📨 Send Request';}
 }
+
+
+// ── Scrolling photo cards ──────────────────────────────────────────────────
+let scrollPos = 0;
+const CARD_W = 130; // card width + gap
+const NUM_CARDS = 6;
+const LOOP_W = NUM_CARDS * CARD_W;
+
+function animateStrip() {
+  scrollPos = (scrollPos + 0.6) % LOOP_W;
+  const el = document.getElementById('photoStripInner');
+  if (el) el.style.transform = `translateX(-${scrollPos}px)`;
+  requestAnimationFrame(animateStrip);
+}
+requestAnimationFrame(animateStrip);
+
+function updateCardColors(team) {
+  document.querySelectorAll('.photo-card').forEach(card => {
+    card.style.borderColor = `${team.color}88`;
+    card.style.boxShadow = `0 4px 20px rgba(0,0,0,0.5), 0 0 12px ${team.color}44`;
+    const top = card.querySelector('.photo-card-top');
+    if (top) top.style.background = `linear-gradient(90deg,${team.color},${team.accent==='#FFFFFF'?'#f0c040':team.accent})`;
+  });
+}
+
+
+
 
 if(sessionStorage.getItem('spiceblend_token'))window.location.href='/';
 document.getElementById('bgPhoto').style.backgroundImage=`url(${STADIUM_IMAGES[0]})`;
