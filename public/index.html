@@ -3,350 +3,1038 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Spice Blend</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>The Spice Blend — Saturday Lunch Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-serif}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-@keyframes slide-up    {0%{transform:translateY(30px);opacity:0}100%{transform:translateY(0);opacity:1}}
-@keyframes fade-in     {0%{opacity:0}100%{opacity:1}}
-@keyframes blossom-fall{0%{transform:translateY(-10px) rotate(0deg) translateX(0);opacity:0.9}100%{transform:translateY(105vh) rotate(540deg) translateX(60px);opacity:0}}
-@keyframes sway-lantern{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-@keyframes shimmer     {0%,100%{opacity:0.7}50%{opacity:1}}
-@keyframes glow-green  {0%,100%{box-shadow:0 0 25px rgba(30,100,50,0.3),0 20px 60px rgba(0,0,0,0.4)}50%{box-shadow:0 0 50px rgba(40,140,60,0.5),0 20px 60px rgba(0,0,0,0.4)}}
-@keyframes shake       {0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-@keyframes confetti-drop{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
-@keyframes pulse-dot   {0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.4);opacity:1}}
-@keyframes ticker      {0%{transform:translateX(100%)}100%{transform:translateX(-200%)}}
-@keyframes float-badge {0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  :root {
+    --green-dark: #1a3a2a;
+    --green-mid: #2d5a3d;
+    --green-light: #4a8c5c;
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --cream: #fdf8f0;
+    --cream-alt: #f5ede0;
+    --border: #e8dcc8;
+    --ink: #1a1a18;
+    --ink-muted: #5a5a50;
+    --ink-faint: #a0a090;
+    --red: #8b2020;
+    --radius: 8px;
+    --radius-lg: 16px;
+  }
 
-/* ── Full background image ── */
-#bgImg {
-  position:fixed;inset:0;z-index:0;
-  background-image:url('https://github.com/TheSpiceBlend/order-form/blob/main/Spice_Kerala.png?raw=true');
-  background-size:cover;
-  background-position:center top;
-  transform:scale(1.02);
-  transition:opacity 0.5s;
-}
+  body {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background: var(--green-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 5rem;
+    position: relative;
+    overflow-x: hidden;
+  }
 
-/* ── Subtle dark overlay — preserves image beauty ── */
-#overlay {
-  position:fixed;inset:0;z-index:1;
-  background:linear-gradient(
-    135deg,
-    rgba(0,0,0,0.08) 0%,
-    rgba(0,0,0,0.05) 40%,
-    rgba(0,0,0,0.35) 70%,
-    rgba(0,0,0,0.65) 100%
-  );
-}
+  /* ── Decorative background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(74,140,92,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 80%, rgba(201,168,76,0.12) 0%, transparent 60%),
+      linear-gradient(160deg, #0f2018 0%, #1a3a2a 40%, #142d1e 100%);
+    z-index: 0;
+  }
 
-/* ── Bottom gradient for ticker ── */
-#bottomFade {
-  position:fixed;bottom:0;left:0;right:0;height:80px;z-index:2;
-  background:linear-gradient(180deg,transparent,rgba(0,0,0,0.7));
-  pointer-events:none;
-}
+  /* Leaf decorations */
+  .leaf {
+    position: fixed;
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .leaf-1 { top: -40px; left: -60px; width: 300px; transform: rotate(-30deg); }
+  .leaf-2 { bottom: 10%; right: -80px; width: 280px; transform: rotate(20deg) scaleX(-1); }
+  .leaf-3 { top: 40%; left: -40px; width: 180px; transform: rotate(60deg); }
 
-/* ── Cherry blossom petals ── */
-#blossoms{position:fixed;inset:0;z-index:3;pointer-events:none;}
-.petal{position:absolute;animation:blossom-fall linear infinite;pointer-events:none;}
+  /* ── Hero header ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    text-align: center;
+    padding: 3.5rem 1rem 2.5rem;
+  }
 
-/* ── Ticker ── */
-#ticker {
-  position:fixed;bottom:0;left:0;right:0;height:28px;z-index:9;
-  background:rgba(10,40,15,0.75);
-  border-top:1px solid rgba(100,180,80,0.4);
-  overflow:hidden;display:flex;align-items:center;
-  backdrop-filter:blur(6px);
-}
-#tickerInner {
-  white-space:nowrap;animation:ticker 30s linear infinite;
-  font-size:10px;color:rgba(255,255,255,0.85);letter-spacing:0.06em;
-}
-.t-dot{color:#7ec850;margin:0 12px;}
-.t-jp{color:#f8b4c8;font-family:'Noto Serif JP',serif;margin:0 10px;}
+  .hero-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    padding: 5px 16px;
+    border-radius: 20px;
+    margin-bottom: 1.25rem;
+    background: rgba(201,168,76,0.08);
+  }
 
-/* ── Main layout ── */
-#mainWrap {
-  position:fixed;inset:0;bottom:28px;z-index:10;
-  display:flex;flex-direction:column;
-  align-items:flex-end;justify-content:center;
-  padding:1.5rem 1.25rem 1rem;
-}
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  }
 
-/* ── Login card ── */
-#loginCard {
-  width:100%;max-width:300px;
-  background:rgba(255,252,248,0.12);
-  border:1px solid rgba(255,255,255,0.25);
-  border-radius:16px;
-  padding:1.5rem 1.4rem 1.25rem;
-  backdrop-filter:blur(28px);
-  -webkit-backdrop-filter:blur(28px);
-  animation:slide-up 0.9s ease forwards, glow-green 3s ease-in-out infinite;
-  box-shadow:0 8px 40px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.3);
-}
+  .hero h1 span { color: var(--gold-light); }
 
-/* Brand inside card */
-.card-brand {
-  text-align:center;margin-bottom:1.1rem;
-}
-.card-brand .top-tag {
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(30,80,30,0.6);border:1px solid rgba(100,200,80,0.4);
-  border-radius:20px;padding:3px 10px;
-  font-size:9px;color:rgba(255,255,255,0.8);
-  letter-spacing:0.15em;text-transform:uppercase;
-  margin-bottom:0.6rem;backdrop-filter:blur(4px);
-  animation:float-badge 3s ease-in-out infinite;
-}
-.card-brand .logo-icon {
-  font-size:2.2rem;display:block;margin-bottom:0.3rem;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4));
-}
-.card-brand .brand-name {
-  font-family:'Noto Serif JP',serif;
-  font-size:1.55rem;color:white;font-weight:700;
-  line-height:1;margin-bottom:2px;
-  text-shadow:0 2px 12px rgba(0,0,0,0.5);
-}
-.card-brand .brand-jp {
-  font-family:'Noto Serif JP',serif;
-  font-size:10px;color:rgba(255,220,200,0.8);
-  letter-spacing:0.2em;display:block;margin-bottom:3px;
-}
-.card-brand .brand-divider {
-  width:50px;height:1px;margin:6px auto;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
-}
-.card-brand .brand-tag {
-  font-size:9px;color:rgba(255,255,255,0.45);
-  letter-spacing:0.2em;text-transform:uppercase;
-}
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.6);
+    max-width: 360px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
 
-/* Input */
-.input-wrap{position:relative;margin-bottom:0.75rem;}
-.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(255,255,255,0.4);}
-#pwInput {
-  width:100%;padding:11px 36px 11px 36px;
-  font-family:'Poppins',sans-serif;font-size:13px;
-  color:white;letter-spacing:0.15em;text-align:center;
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.25);
-  border-radius:30px;outline:none;transition:all 0.3s;
-}
-#pwInput::placeholder{color:rgba(255,255,255,0.35);letter-spacing:0.05em;}
-#pwInput:focus{border-color:rgba(120,200,80,0.7);background:rgba(255,255,255,0.18);box-shadow:0 0 0 3px rgba(80,180,60,0.15);}
-#pwToggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.4);}
+  /* Divider */
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 1.75rem;
+    color: rgba(201,168,76,0.5);
+    font-size: 18px;
+  }
+  .hero-divider::before,
+  .hero-divider::after {
+    content: '';
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4));
+  }
+  .hero-divider::after { transform: scaleX(-1); }
 
-/* Button */
-#loginBtn {
-  width:100%;padding:12px;
-  font-family:'Noto Serif JP',serif;font-size:14px;font-weight:600;
-  color:white;letter-spacing:0.05em;
-  background:linear-gradient(135deg,#1a6b30 0%,#2d8a3d 40%,#4aaa50 100%);
-  border:none;border-radius:30px;cursor:pointer;
-  box-shadow:0 4px 20px rgba(30,100,40,0.5);
-  transition:all 0.3s;margin-bottom:0.6rem;
-}
-#loginBtn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(30,120,50,0.6);}
-#loginBtn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+  /* ── Form card ── */
+  .form-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 580px;
+    padding: 0 1rem;
+  }
 
-#pwError{display:none;font-size:11px;color:#ffaaaa;background:rgba(220,50,50,0.15);border:1px solid rgba(220,50,50,0.25);border-radius:20px;padding:7px 12px;margin-bottom:0.5rem;text-align:center;}
-#successMsg{display:none;text-align:center;color:#afffaa;font-size:0.95rem;font-weight:600;padding:0.75rem 0;}
+  .form-card {
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.1),
+      0 8px 40px rgba(0,0,0,0.4),
+      0 2px 8px rgba(0,0,0,0.2);
+  }
 
-.access-link{text-align:center;font-size:10px;color:rgba(255,255,255,0.45);}
-.access-link span{color:#aee87a;text-decoration:underline;cursor:pointer;font-weight:500;}
+  .section {
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
 
-/* ── Modal ── */
-#modalBg{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem;}
-#modalBg.open{display:flex;}
-#modal{width:100%;max-width:320px;background:rgba(10,30,12,0.95);border:1px solid rgba(100,200,80,0.35);border-radius:16px;padding:1.5rem;box-shadow:0 24px 70px rgba(0,0,0,0.7);position:relative;}
-#modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#1a6b30,#7ec850,#1a6b30);}
-#modalClose{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;}
-.m-icon{font-size:1.8rem;text-align:center;margin-bottom:0.5rem;}
-.m-title{font-family:'Noto Serif JP',serif;font-size:1.2rem;color:white;text-align:center;margin-bottom:0.3rem;}
-.m-sub{font-size:11px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:1rem;line-height:1.5;}
-#modal label{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(100,200,80,0.7);margin-bottom:5px;display:block;}
-#modal input,#modal textarea{width:100%;padding:9px 12px;font-family:'Poppins',sans-serif;font-size:12px;color:white;background:rgba(255,255,255,0.07);border:1px solid rgba(100,200,80,0.2);border-radius:8px;outline:none;margin-bottom:10px;box-sizing:border-box;}
-#modal textarea{resize:none;height:52px;}
-#sendBtn{width:100%;padding:11px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;color:white;background:linear-gradient(135deg,#1a6b30,#2d8a3d);border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 16px rgba(30,100,40,0.4);}
-.m-err{display:none;font-size:11px;color:#ffaaaa;background:rgba(220,50,50,0.1);border:1px solid rgba(220,50,50,0.2);border-radius:8px;padding:7px;margin-bottom:10px;text-align:center;}
-.m-ok{display:none;text-align:center;color:#afffaa;font-size:13px;padding:1rem 0;}
-.m-note{font-size:9px;color:rgba(255,255,255,0.2);text-align:center;margin-top:0.75rem;line-height:1.4;}
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
-.confetti-piece{position:fixed;z-index:20;pointer-events:none;}
+  .field { margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--green-light);
+    box-shadow: 0 0 0 3px rgba(74,140,92,0.12);
+  }
+
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── Products ── */
+  .products-grid { display: flex; flex-direction: column; gap: 12px; }
+
+  .product-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: white;
+    transition: all 0.2s;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    flex-wrap: wrap;
+  }
+
+  .product-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--green-light);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .product-item.active {
+    border-color: var(--green-light);
+    background: #f6fbf7;
+    box-shadow: 0 2px 12px rgba(74,140,92,0.12);
+  }
+
+  .product-item.active::before { opacity: 1; }
+
+  .product-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .product-item.active .product-check {
+    background: var(--green-mid);
+    border-color: var(--green-mid);
+  }
+
+  .product-item.active .product-check::after {
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+
+  .product-img {
+    width: 68px;
+    height: 68px;
+    border-radius: var(--radius);
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .product-img-placeholder {
+    width: 68px;
+    height: 68px;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .product-info { flex: 1; min-width: 0; }
+  .product-name { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+  .product-desc { font-size: 12px; color: var(--ink-faint); margin-top: 3px; }
+
+  .product-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .product-price {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+
+  .qty-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .product-item.active .qty-wrapper {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--green-light);
+    border-radius: 50%;
+    background: white;
+    color: var(--green-mid);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-weight: 600;
+  }
+  .qty-btn:hover { background: var(--green-mid); color: white; border-color: var(--green-mid); }
+
+  .qty-input {
+    width: 34px !important;
+    padding: 4px 4px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    text-align: center;
+    background: white !important;
+    border-color: var(--border) !important;
+  }
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .qty-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+  /* ── Mobile fix: prevent product card from collapsing into a narrow column ── */
+  @media (max-width: 420px) {
+    .product-item {
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .product-check { order: 1; }
+    .product-img,
+    .product-img-placeholder { order: 2; }
+    .product-info {
+      order: 3;
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100%;
+      margin-top: 10px;
+    }
+    .product-right {
+      order: 4;
+      flex: 1 1 100%;
+      width: 100%;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .product-name { font-size: 15px; }
+  }
+
+  /* ── Summary ── */
+  .summary-rows { display: flex; flex-direction: column; gap: 8px; }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--ink-muted);
+  }
+
+  .summary-row.total {
+    border-top: 2px solid var(--border);
+    padding-top: 12px;
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .empty-cart { font-size: 13px; color: var(--ink-faint); font-style: italic; }
+
+  /* ── Submit ── */
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 14px rgba(45,90,61,0.4);
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,90,61,0.5); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .form-note {
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* ── Success ── */
+  .success-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 20px rgba(45,90,61,0.4);
+  }
+
+  .success-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--green-dark);
+  }
+
+  .success-sub {
+    font-size: 14px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 320px;
+  }
+
+  .order-ref {
+    margin-top: 1.25rem;
+    padding: 10px 20px;
+    background: var(--cream-alt);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--ink-muted);
+    border: 1px solid var(--border);
+  }
+  .order-ref strong { color: var(--ink); font-family: monospace; font-size: 14px; }
+
+  /* ── Error ── */
+  .error-msg {
+    display: none;
+    padding: 10px 14px;
+    background: #fdf0ed;
+    border: 1px solid #f5c4b3;
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: #993c1d;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    position: relative;
+    z-index: 1;
+    margin-top: 2rem;
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .success-info-box {
+    width: 100%;
+    max-width: 320px;
+    margin-top: 1rem;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+  }
+  .success-info-box.email-box {
+    background: #f0f7ff;
+    border: 1px solid #c8dff5;
+  }
+  .success-info-box.payment-box {
+    background: #fff5f5;
+    border: 1px solid #f5c8c8;
+  }
+  .info-box-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .info-box-text { font-size: 12px; line-height: 1.55; color: var(--ink-muted); }
+  .info-box-text strong { color: var(--ink); font-size: 13px; display: block; margin-bottom: 2px; }
+
+  .new-order-btn {
+    margin-top: 1.5rem;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(45,90,61,0.3);
+  }
+  .new-order-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,90,61,0.4); }
+
+  /* ── Password screen ── */
+  #passwordScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(74,140,92,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 80%, rgba(201,168,76,0.12) 0%, transparent 60%),
+      linear-gradient(160deg, #0f2018 0%, #1a3a2a 40%, #142d1e 100%);
+  }
+  .pw-card {
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  .pw-logo { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .pw-brand { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
+  .pw-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--green-dark); margin-bottom: 0.4rem; }
+  .pw-sub { font-size: 13px; color: var(--ink-faint); margin-bottom: 1.75rem; line-height: 1.5; }
+  .pw-input-wrap { position: relative; margin-bottom: 1rem; }
+  .pw-input {
+    width: 100%;
+    padding: 12px 44px 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.12em;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .pw-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,92,0.12); }
+  .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: var(--ink-faint); padding: 4px; }
+  .pw-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(45,90,61,0.4);
+  }
+  .pw-btn:hover { transform: translateY(-1px); }
+  .pw-error { display: none; margin-top: 0.75rem; font-size: 13px; color: #993c1d; background: #fdf0ed; border: 1px solid #f5c4b3; border-radius: var(--radius); padding: 8px 12px; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+  .pw-shake { animation: shake 0.4s ease; }
+
+
+  /* ── Sold out ── */
+  .product-item.sold-out {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: #f9f9f7;
+  }
+  .product-item.sold-out::before { display: none; }
+  .product-item.sold-out .product-check {
+    background: #e8e8e4;
+    border-color: #d0cfc8;
+  }
+  .product-item.sold-out .product-img { filter: grayscale(60%); }
+  .sold-out-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #993c1d;
+    background: #fdf0ed;
+    border: 1px solid #f5c4b3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  .product-item.sold-out .product-price {
+    text-decoration: line-through;
+    color: var(--ink-faint);
+  }
 </style>
 </head>
 <body>
 
-<!-- Background image -->
-<div id="bgImg"></div>
-<div id="overlay"></div>
-<div id="bottomFade"></div>
-
-<!-- Cherry blossoms -->
-<div id="blossoms"></div>
-
-<!-- Ticker -->
-<div id="ticker">
-  <div id="tickerInner">
-    <span class="t-jp">🌸</span><span>The Spice Blend · Authentic Kerala Cuisine</span>
-    <span class="t-dot">🌿</span><span>Ghee Rice with Chicken Roast &amp; Salad — ¥1,500</span>
-    <span class="t-jp">🍛</span><span>ケーララ料理 · 毎週のご注文 · Fresh Kerala cuisine weekly</span>
-    <span class="t-dot">⛩</span><span>南の香りを、日本の食卓へ · Delivering Kerala flavours to Japan</span>
-    <span class="t-jp">🥥</span><span>Natural Ingredients · Traditional Recipes · Freshly Delivered</span>
+<!-- Password Screen -->
+<div id="passwordScreen">
+  <div class="pw-card">
+    <div class="pw-logo">🌿</div>
+    <div class="pw-brand">The Spice Blend</div>
+    <div class="pw-title">Members Only</div>
+    <p class="pw-sub">Enter the password to access the weekly order form.</p>
+    <div class="pw-input-wrap">
+      <input class="pw-input" type="password" id="pwInput" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') checkPassword()">
+      <button class="pw-toggle" onclick="togglePwVisibility()" id="pwToggleBtn" title="Show/hide password">👁</button>
+    </div>
+    <button class="pw-btn" onclick="checkPassword()">Enter →</button>
+    <div class="pw-error" id="pwError">Incorrect password. Please try again.</div>
   </div>
 </div>
 
-<!-- Main content -->
-<div id="mainWrap">
-  <div id="loginCard">
-    <div class="card-brand">
-      <div class="top-tag">🇮🇳 Kerala Meets Japan 🇯🇵</div>
-      <span class="logo-icon">🍛</span>
-      <span class="brand-jp">スパイスブレンド</span>
-      <div class="brand-name">The Spice Blend</div>
-      <div class="brand-divider"></div>
-      <div class="brand-tag">God's Own Kitchen · 東京</div>
-    </div>
 
-    <div class="input-wrap">
-      <span class="input-icon">🔑</span>
-      <input id="pwInput" type="password" placeholder="アクセスコード / Access code" autocomplete="off">
-      <button id="pwToggle" onclick="togglePw()">👁</button>
-    </div>
-    <div id="pwError">❌ Wrong code — try again!</div>
-    <div id="successMsg">🌸 Welcome! Redirecting...</div>
-    <button id="loginBtn" onclick="handleLogin()">今すぐ注文する 🍛</button>
-    <div class="access-link">Don't have access? <span onclick="openModal()">Request here →</span></div>
-  </div>
+<!-- Leaf SVG decorations -->
+<svg class="leaf leaf-1" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M100 10 C20 60 0 150 80 290 C80 290 180 200 160 80 C140 20 100 10 100 10Z" fill="#4a8c5c"/>
+  <path d="M100 10 C100 10 100 150 80 290" stroke="#2d5a3d" stroke-width="3"/>
+</svg>
+<svg class="leaf leaf-2" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M100 10 C20 60 0 150 80 290 C80 290 180 200 160 80 C140 20 100 10 100 10Z" fill="#4a8c5c"/>
+  <path d="M100 10 C100 10 100 150 80 290" stroke="#2d5a3d" stroke-width="3"/>
+</svg>
+<svg class="leaf leaf-3" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M100 10 C20 60 0 150 80 290 C80 290 180 200 160 80 C140 20 100 10 100 10Z" fill="#4a8c5c"/>
+</svg>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">🌿 The Spice Blend</div>
+  <h1>Place your <span>Saturday Lunch Order</span></h1>
+  <p class="hero-sub">Authentic Kerala home cooking — delivered fresh to your door.</p>
+  <div class="hero-divider">🍃</div>
 </div>
 
-<!-- Modal -->
-<div id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div id="modal">
-    <button id="modalClose" onclick="closeModal()">✕</button>
-    <div class="m-icon">🌿</div>
-    <div class="m-title">Request Access</div>
-    <div class="m-sub">Fill in your details and we'll get you into the kitchen!</div>
-    <div class="m-err" id="mErr"></div>
-    <div id="mForm">
-      <label>Your Name</label><input type="text" id="mName" placeholder="e.g. Hiroshi Tanaka">
-      <label>Email Address</label><input type="email" id="mEmail" placeholder="e.g. you@example.com">
-      <label>Message (optional)</label>
-      <textarea id="mMsg" placeholder="How did you hear about us?"></textarea>
-      <button id="sendBtn" onclick="submitRequest()">📨 Send Request</button>
-      <div class="m-note">We'll email you access details as soon as possible.</div>
+<!-- Form -->
+<div class="form-wrap">
+<div class="form-card" id="formCard">
+
+  <!-- Contact -->
+  <div class="section">
+    <div class="section-label">Your details</div>
+    <div class="field-row field">
+      <div>
+        <label for="firstName">First name</label>
+        <input type="text" id="firstName" placeholder="Japan" required>
+      </div>
+      <div>
+        <label for="lastName">Last name</label>
+        <input type="text" id="lastName" placeholder="Japan" required>
+      </div>
     </div>
-    <div class="m-ok" id="mOk">✅ Request sent! We'll be in touch soon.</div>
+    <div class="field">
+      <label for="email">Email address</label>
+      <input type="email" id="email" placeholder="Japan@japan.com" required>
+    </div>
+    <div class="field">
+      <label for="phone">Phone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input type="tel" id="phone" placeholder="080-0000-0000">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+      <span id="savedHint" style="display:none;font-size:12px;color:var(--ink-faint)"></span>
+      <button onclick="forgetMe()" style="display:none;font-size:12px;color:var(--ink-faint);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0" id="forgetBtn">Clear saved details</button>
+    </div>
   </div>
+
+  <!-- Products -->
+  <div class="section">
+    <div class="section-label">Select your items</div>
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+
+  <!-- Summary -->
+  <div class="section">
+    <div class="section-label">Order summary</div>
+    <div id="summaryContent">
+      <p class="empty-cart">No items selected yet.</p>
+    </div>
+  </div>
+
+  <!-- Notes + Submit -->
+  <div class="section">
+    <div class="field">
+      <label for="notes">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <textarea id="notes" placeholder="Delivery instructions, allergies, special requests…"></textarea>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitOrder()">🛒 Place Order</button>
+    <p class="form-note">You'll receive a confirmation email with your order details.</p>
+  </div>
+
+  <!-- Success -->
+  <div class="success-state" id="successState">
+    <div class="success-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <div class="success-title">Order received! 🎉</div>
+    <p class="success-sub">Thank you for your order!</p>
+    <div class="order-ref">Order reference: <strong id="orderRef"></strong></div>
+
+    <div class="success-info-box email-box">
+      <div class="info-box-icon">📧</div>
+      <div class="info-box-text">
+        <strong>Confirmation email sent</strong>
+        A confirmation with your full order details has been sent to your email address.
+      </div>
+    </div>
+
+    <div class="success-info-box payment-box">
+      <div class="info-box-icon">💳</div>
+      <div class="info-box-text">
+        <strong>Payment link included</strong>
+        Your email also contains a PayPay payment link for the exact order amount. Please complete payment to confirm your order.
+      </div>
+    </div>
+
+    <button class="new-order-btn" onclick="resetForm()">🛒 Place Another Order</button>
+  </div>
+
 </div>
+</div>
+
+<div class="footer">© The Spice Blend · Authentic Kerala Cuisine</div>
 
 <script>
-// ── Cherry blossom petals ─────────────────────────────────────────────────
-const blossomEl = document.getElementById('blossoms');
-const petalTypes = ['🌸','🌸','🌺','🌸','🌸'];
-for (let i=0; i<25; i++) {
-  const p = document.createElement('div');
-  p.className = 'petal';
-  p.textContent = petalTypes[i % petalTypes.length];
-  const size = 0.7 + Math.random() * 0.9;
-  p.style.cssText = `
-    font-size:${size}rem;
-    left:${Math.random()*100}%;
-    animation-duration:${7+Math.random()*8}s;
-    animation-delay:${Math.random()*8}s;
-    opacity:${0.5+Math.random()*0.4};
-  `;
-  blossomEl.appendChild(p);
+
+// ─── Password Protection (Secure — verified on backend) ──────────────────────
+
+async function checkPassword() {
+  const input  = document.getElementById('pwInput').value;
+  const error  = document.getElementById('pwError');
+  const card   = document.querySelector('.pw-card');
+  const btn    = document.querySelector('.pw-btn');
+
+  if (!input) return;
+
+  // Show loading state
+  btn.textContent = 'Checking…';
+  btn.disabled = true;
+  error.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: input })
+    });
+
+    if (res.ok) {
+      const { token } = await res.json();
+      // Store token in session — never stores the actual password
+      sessionStorage.setItem('spiceblend_token', token);
+      // Fade out password screen
+      const screen = document.getElementById('passwordScreen');
+      screen.style.transition = 'opacity 0.4s ease';
+      screen.style.opacity = '0';
+      setTimeout(() => screen.remove(), 400);
+    } else {
+      // Wrong password
+      error.style.display = 'block';
+      card.classList.remove('pw-shake');
+      void card.offsetWidth;
+      card.classList.add('pw-shake');
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwInput').focus();
+      btn.textContent = 'Enter →';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    error.textContent = 'Connection error. Please try again.';
+    error.style.display = 'block';
+    btn.textContent = 'Enter →';
+    btn.disabled = false;
+  }
 }
 
-// ── Password ──────────────────────────────────────────────────────────────
-function togglePw() {
-  const i=document.getElementById('pwInput');
-  const b=document.getElementById('pwToggle');
-  i.type=i.type==='password'?'text':'password';
-  b.textContent=i.type==='password'?'👁':'🙈';
+function togglePwVisibility() {
+  const input = document.getElementById('pwInput');
+  const btn   = document.getElementById('pwToggleBtn');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
 }
-document.getElementById('pwInput').addEventListener('keydown', e => {
-  if (e.key==='Enter') handleLogin();
-  document.getElementById('pwError').style.display='none';
+
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem('spiceblend_token')) {
+  const screen = document.getElementById('passwordScreen');
+  if (screen) screen.remove();
+}
+
+const pwInputEl = document.getElementById('pwInput');
+if (pwInputEl) pwInputEl.focus();
+
+const PRODUCTS = [
+  {
+    id: 'p1',
+    name: 'Ghee Rice with Chicken Roast & Salad',
+    desc: 'Aromatic Kerala ghee rice served with spicy chicken roast and fresh salad',
+    price: 1500,
+    img: 'https://github.com/TheSpiceBlend/order-form/blob/main/Ghee_rice_Dal.jpg?raw=true',
+    soldOut: false  // ← Change to true to mark as sold out
+  },
+];
+
+const grid = document.getElementById('productsGrid');
+PRODUCTS.forEach(p => {
+  const el = document.createElement('div');
+  el.className = 'product-item' + (p.soldOut ? ' sold-out' : '');
+  el.id = 'item-' + p.id;
+  el.innerHTML = `
+    <div class="product-check" id="check-${p.id}"></div>
+    ${p.img
+      ? `<img class="product-img" src="${p.img}" alt="${p.name}" ${p.soldOut ? 'style="filter:grayscale(60%)"' : ''}>`
+      : `<div class="product-img-placeholder">🍖</div>`
+    }
+    <div class="product-info">
+      <div class="product-name">${p.name}</div>
+      <div class="product-desc">${p.desc}</div>
+      ${p.soldOut ? '<span class="sold-out-badge">Sold Out</span>' : ''}
+    </div>
+    <div class="product-right">
+      <div class="product-price">¥${p.price.toLocaleString()}</div>
+      ${!p.soldOut ? `<div class="qty-wrapper" id="qty-${p.id}">
+        <button class="qty-btn" onclick="changeQty('${p.id}',-1,event)">−</button>
+        <input class="qty-input" type="number" min="1" max="99" value="1"
+               id="qtyVal-${p.id}" oninput="updateSummary()" onclick="event.stopPropagation()">
+        <button class="qty-btn" onclick="changeQty('${p.id}',1,event)">+</button>
+      </div>` : ''}
+    </div>
+  `;
+  if (!p.soldOut) el.addEventListener('click', () => toggleProduct(p.id));
+  grid.appendChild(el);
 });
 
-async function handleLogin() {
-  const pw=document.getElementById('pwInput').value;
-  const btn=document.getElementById('loginBtn');
-  const err=document.getElementById('pwError');
-  const card=document.getElementById('loginCard');
-  if (!pw) return;
-  btn.disabled=true; btn.textContent='⏳ 確認中...'; err.style.display='none';
+function toggleProduct(id) {
+  document.getElementById('item-' + id).classList.toggle('active');
+  updateSummary();
+}
+
+function changeQty(id, delta, e) {
+  e.stopPropagation();
+  const input = document.getElementById('qtyVal-' + id);
+  input.value = Math.max(1, Math.min(99, parseInt(input.value || 1) + delta));
+  updateSummary();
+}
+
+function getSelectedProducts() {
+  return PRODUCTS
+    .filter(p => !p.soldOut && document.getElementById('item-' + p.id).classList.contains('active'))
+    .map(p => ({ ...p, qty: parseInt(document.getElementById('qtyVal-' + p.id).value) || 1 }));
+}
+
+function updateSummary() {
+  const selected = getSelectedProducts();
+  const el = document.getElementById('summaryContent');
+  if (!selected.length) { el.innerHTML = '<p class="empty-cart">No items selected yet.</p>'; return; }
+  const total = selected.reduce((s, p) => s + p.price * p.qty, 0);
+  el.innerHTML = `<div class="summary-rows">
+    ${selected.map(p => `
+      <div class="summary-row">
+        <span>${p.name} × ${p.qty}</span>
+        <span>¥${(p.price * p.qty).toLocaleString()}</span>
+      </div>`).join('')}
+    <div class="summary-row total">
+      <span>Total</span>
+      <span>¥${total.toLocaleString()}</span>
+    </div>
+  </div>`;
+}
+
+async function submitOrder() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const phone     = document.getElementById('phone').value.trim();
+  const notes     = document.getElementById('notes').value.trim();
+  const selected  = getSelectedProducts();
+  const errorMsg  = document.getElementById('errorMsg');
+
+  errorMsg.style.display = 'none';
+  if (!firstName || !lastName) return showError('Please enter your full name.');
+  if (!email || !email.includes('@')) return showError('Please enter a valid email address.');
+  if (!selected.length) return showError('Please select at least one item.');
+
+  const total = selected.reduce((s, p) => s + p.price * p.qty, 0);
+  const orderRef = 'ORD-' + Date.now().toString(36).toUpperCase();
+  const payload = {
+    orderRef,
+    customer: { firstName, lastName, email, phone },
+    products: selected,
+    total: total.toFixed(0),
+    notes,
+    submittedAt: new Date().toISOString()
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
   try {
-    const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-    if (res.ok) {
-      const{token}=await res.json();
-      sessionStorage.setItem('spiceblend_token',token);
-      launchConfetti();
-      document.getElementById('pwInput').style.display='none';
-      document.getElementById('pwToggle').style.display='none';
-      btn.style.display='none';
-      document.querySelector('.input-wrap').style.display='none';
-      document.querySelector('.access-link').style.display='none';
-      document.getElementById('successMsg').style.display='block';
-      setTimeout(()=>window.location.href='/',1500);
-    } else {
-      err.style.display='block';
-      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
-      document.getElementById('pwInput').value='';
-      document.getElementById('pwInput').focus();
-      btn.disabled=false; btn.textContent='今すぐ注文する 🍛';
+    const res = await fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Server error');
+    // Save customer details for next time
+    localStorage.setItem('spiceblend_customer', JSON.stringify({ firstName, lastName, email, phone }));
+    document.getElementById('orderRef').textContent = orderRef;
+    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+    document.getElementById('successState').style.display = 'flex';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '🛒 Place Order';
+    showError('Something went wrong. Please try again.');
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ─── Reset form for new order ────────────────────────────────────────────────
+function resetForm() {
+  // Hide success, show all sections
+  document.getElementById('successState').style.display = 'none';
+  document.querySelectorAll('.section').forEach(s => s.style.display = '');
+
+  // Keep name/email/phone, only clear notes
+  document.getElementById('notes').value = '';
+
+  // Deselect all products & reset quantities
+  PRODUCTS.forEach(p => {
+    const item = document.getElementById('item-' + p.id);
+    if (item) item.classList.remove('active');
+    if (!p.soldOut) {
+      const qty = document.getElementById('qtyVal-' + p.id);
+      if (qty) qty.value = 1;
     }
-  } catch(e) {
-    err.textContent='⚠️ Connection error.'; err.style.display='block';
-    btn.disabled=false; btn.textContent='今すぐ注文する 🍛';
-  }
+  });
+
+  // Reset summary
+  updateSummary();
+
+  // Reset button
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.textContent = '🛒 Place Order';
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Confetti ──────────────────────────────────────────────────────────────
-function launchConfetti() {
-  const colors=['#f8b4c8','#7ec850','#fff','#ffcc44','#ff6b9d','#afffaa','#c9a84c'];
-  for (let i=0;i<120;i++) {
-    const c=document.createElement('div');
-    c.className='confetti-piece';
-    const s=4+Math.random()*10;
-    c.style.cssText=`left:${Math.random()*100}%;top:-20px;width:${s}px;height:${s}px;background:${colors[i%7]};border-radius:${Math.random()>0.5?'50%':'2px'};animation:confetti-drop ${1.2+Math.random()}s ${Math.random()*0.8}s ease-in forwards;`;
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),2500);
-  }
+
+// ─── Autofill saved customer details ────────────────────────────────────────
+function loadSavedCustomer() {
+  try {
+    const saved = localStorage.getItem('spiceblend_customer');
+    if (!saved) return;
+    const { firstName, lastName, email, phone } = JSON.parse(saved);
+    if (firstName) document.getElementById('firstName').value = firstName;
+    if (lastName)  document.getElementById('lastName').value  = lastName;
+    if (email)     document.getElementById('email').value     = email;
+    if (phone)     document.getElementById('phone').value     = phone;
+
+    // Show "not you?" link
+    const hint = document.getElementById('savedHint');
+    if (hint) {
+      hint.textContent = 'Details saved from last order.';
+      hint.style.display = 'block';
+      const forgetBtn = document.getElementById('forgetBtn');
+      if (forgetBtn) forgetBtn.style.display = 'inline';
+    }
+  } catch(e) {}
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────
-function openModal(){document.getElementById('modalBg').classList.add('open');document.getElementById('mName').focus();}
-function closeModal(){document.getElementById('modalBg').classList.remove('open');}
-async function submitRequest(){
-  const name=document.getElementById('mName').value.trim();
-  const email=document.getElementById('mEmail').value.trim();
-  const msg=document.getElementById('mMsg').value.trim();
-  const err=document.getElementById('mErr');
-  const btn=document.getElementById('sendBtn');
-  err.style.display='none';
-  if(!name||!email){err.textContent='Please fill in your name and email.';err.style.display='block';return;}
-  btn.disabled=true;btn.textContent='⏳ Sending...';
-  try{
-    const res=await fetch('/api/access-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message:msg})});
-    const data=await res.json();
-    if(res.ok){document.getElementById('mForm').style.display='none';document.getElementById('mOk').style.display='block';setTimeout(closeModal,2500);}
-    else{err.textContent=data.error||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='📨 Send Request';}
-  }catch(e){err.textContent='⚠️ Connection error.';err.style.display='block';btn.disabled=false;btn.textContent='📨 Send Request';}
+function forgetMe() {
+  localStorage.removeItem('spiceblend_customer');
+  document.getElementById('firstName').value = '';
+  document.getElementById('lastName').value  = '';
+  document.getElementById('email').value     = '';
+  document.getElementById('phone').value     = '';
+  const hint = document.getElementById('savedHint');
+  if (hint) hint.style.display = 'none';
 }
 
-// ── Auth check ────────────────────────────────────────────────────────────
-if(sessionStorage.getItem('spiceblend_token'))window.location.href='/';
-const pEl=document.getElementById('pwInput');
-if(pEl)pEl.focus();
+loadSavedCustomer();
+
 </script>
 </body>
 </html>
