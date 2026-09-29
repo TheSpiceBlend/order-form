@@ -5,162 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Spice Blend</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Clerk: replace YOUR_CLERK_FRONTEND_API with your Clerk Frontend API URL (e.g. clerk.yourdomain.com) -->
+<script async crossorigin="anonymous"
+  src="https://YOUR_CLERK_FRONTEND_API/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  data-clerk-publishable-key="CLERK_PUBLISHABLE_KEY_PLACEHOLDER">
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-serif}
 
-@keyframes slide-up    {0%{transform:translateY(30px);opacity:0}100%{transform:translateY(0);opacity:1}}
-@keyframes fade-in     {0%{opacity:0}100%{opacity:1}}
+@keyframes slide-up{0%{transform:translateY(30px);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes blossom-fall{0%{transform:translateY(-10px) rotate(0deg) translateX(0);opacity:0.9}100%{transform:translateY(105vh) rotate(540deg) translateX(60px);opacity:0}}
-@keyframes sway-lantern{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-@keyframes shimmer     {0%,100%{opacity:0.7}50%{opacity:1}}
-@keyframes glow-green  {0%,100%{box-shadow:0 0 25px rgba(30,100,50,0.3),0 20px 60px rgba(0,0,0,0.4)}50%{box-shadow:0 0 50px rgba(40,140,60,0.5),0 20px 60px rgba(0,0,0,0.4)}}
-@keyframes shake       {0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes glow-green{0%,100%{box-shadow:0 0 25px rgba(30,100,50,0.3),0 20px 60px rgba(0,0,0,0.4)}50%{box-shadow:0 0 50px rgba(40,140,60,0.5),0 20px 60px rgba(0,0,0,0.4)}}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-200%)}}
+@keyframes float-badge{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes confetti-drop{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
-@keyframes pulse-dot   {0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.4);opacity:1}}
-@keyframes ticker      {0%{transform:translateX(100%)}100%{transform:translateX(-200%)}}
-@keyframes float-badge {0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 
-/* ── Full background image ── */
-#bgImg {
-  position:fixed;inset:0;z-index:0;
-  background-image:url('https://github.com/TheSpiceBlend/order-form/blob/main/Spice_Kerala.png?raw=true');
-  background-size:cover;
-  background-position:center top;
-  transform:scale(1.02);
-  transition:opacity 0.5s;
-}
+/* ── Background ── */
+#bgImg{position:fixed;inset:0;z-index:0;background-image:url('https://github.com/TheSpiceBlend/order-form/blob/main/Spice_Kerala.png?raw=true');background-size:cover;background-position:center top;transform:scale(1.02);}
+#overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0.05) 0%,rgba(0,0,0,0.08) 25%,rgba(0,0,0,0.45) 50%,rgba(0,0,0,0.72) 75%,rgba(0,0,0,0.85) 100%);}
 
-/* ── Overlay — preserves image beauty at top, darkens bottom for readability ── */
-#overlay {
-  position:fixed;inset:0;z-index:1;
-  background:linear-gradient(
-    180deg,
-    rgba(0,0,0,0.05) 0%,
-    rgba(0,0,0,0.08) 25%,
-    rgba(0,0,0,0.45) 50%,
-    rgba(0,0,0,0.72) 75%,
-    rgba(0,0,0,0.85) 100%
-  );
-}
-
-/* ── Bottom gradient for ticker ── */
-#bottomFade {
-  position:fixed;bottom:0;left:0;right:0;height:80px;z-index:2;
-  background:linear-gradient(180deg,transparent,rgba(0,0,0,0.7));
-  pointer-events:none;
-}
-
-/* ── Cherry blossom petals ── */
+/* ── Petals ── */
 #blossoms{position:fixed;inset:0;z-index:3;pointer-events:none;}
 .petal{position:absolute;animation:blossom-fall linear infinite;pointer-events:none;}
 
 /* ── Ticker ── */
-#ticker {
-  position:fixed;bottom:0;left:0;right:0;height:28px;z-index:9;
-  background:rgba(10,40,15,0.75);
-  border-top:1px solid rgba(100,180,80,0.4);
-  overflow:hidden;display:flex;align-items:center;
-  backdrop-filter:blur(6px);
-}
-#tickerInner {
-  white-space:nowrap;animation:ticker 30s linear infinite;
-  font-size:10px;color:rgba(255,255,255,0.85);letter-spacing:0.06em;
-}
+#ticker{position:fixed;bottom:0;left:0;right:0;height:28px;z-index:9;background:rgba(10,40,15,0.75);border-top:1px solid rgba(100,180,80,0.4);overflow:hidden;display:flex;align-items:center;backdrop-filter:blur(6px);}
+#tickerInner{white-space:nowrap;animation:ticker 30s linear infinite;font-size:10px;color:rgba(255,255,255,0.85);letter-spacing:0.06em;}
 .t-dot{color:#7ec850;margin:0 12px;}
-.t-jp{color:#f8b4c8;font-family:'Noto Serif JP',serif;margin:0 10px;}
 
-/* ── Main layout ── */
-#mainWrap {
-  position:fixed;inset:0;bottom:28px;z-index:10;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-end;
-  padding:1.5rem 1.25rem 1rem;
-}
+/* ── Main wrap ── */
+#mainWrap{position:fixed;inset:0;bottom:28px;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:1.5rem 1.25rem 1rem;}
 
-/* ── Login card ── */
-#loginCard {
-  width:100%;max-width:360px;
-  background:rgba(5,20,8,0.72);
-  border:1px solid rgba(150,220,100,0.3);
-  border-radius:20px;
-  padding:1.5rem 1.4rem 1.25rem;
-  backdrop-filter:blur(30px);
-  -webkit-backdrop-filter:blur(30px);
-  animation:slide-up 0.9s ease forwards, glow-green 3s ease-in-out infinite;
-  box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1);
-}
+/* ── Card ── */
+#loginCard{width:100%;max-width:360px;background:rgba(5,20,8,0.80);border:1px solid rgba(150,220,100,0.3);border-radius:20px;padding:1.4rem;backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);animation:slide-up 0.9s ease forwards,glow-green 3s ease-in-out infinite;box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1);}
 
-/* Brand inside card */
-.card-brand {
-  text-align:center;margin-bottom:0.8rem;
-}
-.card-brand .top-tag {
-  display:inline-flex;align-items:center;gap:5px;
-  background:rgba(30,80,30,0.6);border:1px solid rgba(100,200,80,0.4);
-  border-radius:20px;padding:3px 10px;
-  font-size:9px;color:rgba(255,255,255,0.8);
-  letter-spacing:0.15em;text-transform:uppercase;
-  margin-bottom:0.6rem;backdrop-filter:blur(4px);
-  animation:float-badge 3s ease-in-out infinite;
-}
-.card-brand .logo-icon {
-  font-size:1.8rem;display:block;margin-bottom:0.3rem;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,0.6));
-}
-.card-brand .brand-name {
-  font-family:'Noto Serif JP',serif;
-  font-size:1.4rem;color:white;font-weight:700;
-  line-height:1;margin-bottom:2px;
-  text-shadow:0 2px 12px rgba(0,0,0,0.8);
-}
-.card-brand .brand-jp {
-  font-family:'Noto Serif JP',serif;
-  font-size:10px;color:rgba(255,220,200,0.8);
-  letter-spacing:0.2em;display:block;margin-bottom:3px;
-}
-.card-brand .brand-divider {
-  width:50px;height:1px;margin:6px auto;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
-}
-.card-brand .brand-tag {
-  font-size:9px;color:rgba(255,255,255,0.45);
-  letter-spacing:0.2em;text-transform:uppercase;
-}
+/* ── Brand ── */
+.card-brand{text-align:center;margin-bottom:1rem;}
+.top-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(30,80,30,0.6);border:1px solid rgba(100,200,80,0.4);border-radius:20px;padding:3px 10px;font-size:9px;color:rgba(255,255,255,0.8);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.6rem;animation:float-badge 3s ease-in-out infinite;}
+.logo-icon{font-size:1.8rem;display:block;margin-bottom:0.3rem;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.6));}
+.brand-jp{font-family:'Noto Serif JP',serif;font-size:10px;color:rgba(255,220,200,0.8);letter-spacing:0.2em;display:block;margin-bottom:3px;}
+.brand-name{font-family:'Noto Serif JP',serif;font-size:1.4rem;color:white;font-weight:700;line-height:1;margin-bottom:2px;text-shadow:0 2px 12px rgba(0,0,0,0.8);}
+.brand-divider{width:50px;height:1px;margin:6px auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);}
+.brand-tag{font-size:9px;color:rgba(255,255,255,0.4);letter-spacing:0.2em;text-transform:uppercase;}
 
-/* Input */
-.input-wrap{position:relative;margin-bottom:0.75rem;}
-.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(255,255,255,0.4);}
-#pwInput {
-  width:100%;padding:11px 36px 11px 36px;
-  font-family:'Poppins',sans-serif;font-size:13px;
-  color:white;letter-spacing:0.15em;text-align:center;
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.25);
-  border-radius:30px;outline:none;transition:all 0.3s;
-}
-#pwInput::placeholder{color:rgba(255,255,255,0.35);letter-spacing:0.05em;}
-#pwInput:focus{border-color:rgba(120,200,80,0.7);background:rgba(255,255,255,0.18);box-shadow:0 0 0 3px rgba(80,180,60,0.15);}
-#pwToggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.4);}
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;margin-bottom:1.1rem;background:rgba(255,255,255,0.06);border-radius:30px;padding:3px;}
+.tab-btn{flex:1;padding:8px;border:none;background:transparent;color:rgba(255,255,255,0.45);font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;border-radius:26px;cursor:pointer;transition:all 0.25s;letter-spacing:0.04em;}
+.tab-btn.active{background:linear-gradient(135deg,#1a6b30,#2d8a3d);color:white;box-shadow:0 2px 12px rgba(30,100,40,0.4);}
 
-/* Button */
-#loginBtn {
-  width:100%;padding:12px;
-  font-family:'Noto Serif JP',serif;font-size:14px;font-weight:600;
-  color:white;letter-spacing:0.05em;
-  background:linear-gradient(135deg,#1a6b30 0%,#2d8a3d 40%,#4aaa50 100%);
-  border:none;border-radius:30px;cursor:pointer;
-  box-shadow:0 4px 20px rgba(30,100,40,0.5);
-  transition:all 0.3s;margin-bottom:0.6rem;
-}
-#loginBtn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(30,120,50,0.6);}
-#loginBtn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+/* ── Form fields ── */
+.form-group{margin-bottom:0.65rem;}
+.form-label{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(120,200,80,0.7);margin-bottom:5px;display:block;}
+.field-wrap{position:relative;}
+.field-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(255,255,255,0.35);}
+.form-input{width:100%;padding:10px 36px 10px 36px;font-family:'Poppins',sans-serif;font-size:13px;color:white;background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.18);border-radius:25px;outline:none;transition:all 0.3s;}
+.form-input::placeholder{color:rgba(255,255,255,0.28);letter-spacing:0.03em;}
+.form-input:focus{border-color:rgba(120,200,80,0.6);background:rgba(255,255,255,0.13);box-shadow:0 0 0 3px rgba(80,180,60,0.12);}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.35);}
 
-#pwError{display:none;font-size:11px;color:#ffaaaa;background:rgba(220,50,50,0.15);border:1px solid rgba(220,50,50,0.25);border-radius:20px;padding:7px 12px;margin-bottom:0.5rem;text-align:center;}
-#successMsg{display:none;text-align:center;color:#afffaa;font-size:0.95rem;font-weight:600;padding:0.75rem 0;}
+/* ── Submit button ── */
+.submit-btn{width:100%;padding:12px;font-family:'Noto Serif JP',serif;font-size:14px;font-weight:600;color:white;letter-spacing:0.04em;background:linear-gradient(135deg,#1a6b30 0%,#2d8a3d 40%,#4aaa50 100%);border:none;border-radius:30px;cursor:pointer;box-shadow:0 4px 20px rgba(30,100,40,0.5);transition:all 0.3s;margin-top:0.2rem;margin-bottom:0.65rem;}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(30,120,50,0.6);}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
 
-.access-link{text-align:center;font-size:10px;color:rgba(255,255,255,0.45);}
-.access-link span{color:#aee87a;text-decoration:underline;cursor:pointer;font-weight:500;}
+/* ── Messages ── */
+.msg-error{display:none;font-size:11px;color:#ffaaaa;background:rgba(220,50,50,0.15);border:1px solid rgba(220,50,50,0.25);border-radius:20px;padding:7px 12px;margin-bottom:0.5rem;text-align:center;}
+.msg-success{display:none;text-align:center;color:#afffaa;font-size:0.9rem;font-weight:600;padding:0.5rem 0;}
+.form-footer{text-align:center;font-size:10px;color:rgba(255,255,255,0.35);margin-top:0.3rem;}
+.form-footer span{color:#aee87a;text-decoration:underline;cursor:pointer;font-weight:500;}
+
+/* ── Password strength ── */
+#strengthBar{height:3px;border-radius:3px;margin-top:5px;transition:all 0.3s;background:transparent;}
+#strengthLabel{font-size:9px;margin-top:3px;display:none;font-weight:500;}
 
 /* ── Modal ── */
 #modalBg{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem;}
@@ -184,10 +102,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 </head>
 <body>
 
-<!-- Background image -->
 <div id="bgImg"></div>
 <div id="overlay"></div>
-<div id="bottomFade"></div>
 
 <!-- Cherry blossoms -->
 <div id="blossoms"></div>
@@ -195,17 +111,21 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
 <!-- Ticker -->
 <div id="ticker">
   <div id="tickerInner">
-    <span class="t-jp">🌸</span><span>The Spice Blend · Authentic Kerala Cuisine</span>
-    <span class="t-dot">🌿</span><span>Kaima Ghee Rice with Chicken Roast &amp; Salad — ¥1,500</span>
-    <span class="t-jp">🍛</span><span>ケーララ料理 · 毎週のご注文 · Fresh Kerala cuisine weekly</span>
-    <span class="t-dot">⛩</span><span>南の香りを、日本の食卓へ · Delivering Kerala flavours to Japan</span>
-    <span class="t-jp">🥥</span><span>Natural Ingredients · Traditional Recipes · Freshly Delivered</span>
+    <span style="color:#f8b4c8;margin:0 10px">🌸</span>
+    <span>The Spice Blend · Authentic Kerala Cuisine</span>
+    <span class="t-dot">🌿</span>
+    <span>Kerala Pothichoru in Original Banana Leaf — ¥2,000</span>
+    <span class="t-dot">🍛</span>
+    <span>ケーララ料理 · 毎週のご注文 · Fresh Kerala cuisine weekly</span>
+    <span class="t-dot">⛩</span>
+    <span>南の香りを、日本の食卓へ · Delivering Kerala flavours to Japan</span>
   </div>
 </div>
 
-<!-- Main content -->
 <div id="mainWrap">
   <div id="loginCard">
+
+    <!-- Brand -->
     <div class="card-brand">
       <div class="top-tag">🇮🇳 Kerala Meets Japan 🇯🇵</div>
       <span class="logo-icon">🍛</span>
@@ -215,25 +135,86 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
       <div class="brand-tag">God's Own Kitchen · 東京</div>
     </div>
 
-    <div class="input-wrap">
-      <span class="input-icon">🔑</span>
-      <input id="pwInput" type="password" placeholder="アクセスコード / Access code" autocomplete="off">
-      <button id="pwToggle" onclick="togglePw()">👁</button>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabSignIn" onclick="switchTab('signin')">Sign In</button>
+      <button class="tab-btn" id="tabSignUp" onclick="switchTab('signup')">Create Account</button>
     </div>
-    <div id="pwError">❌ Wrong code — try again!</div>
-    <div id="successMsg">🌸 Welcome! Redirecting...</div>
-    <button id="loginBtn" onclick="handleLogin()">今すぐ注文する 🍛</button>
-    <div class="access-link">Don't have access? <span onclick="openModal()">Request here →</span></div>
+
+    <!-- Sign In Form -->
+    <div id="formSignIn">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div class="field-wrap">
+          <span class="field-icon">📧</span>
+          <input class="form-input" type="email" id="siEmail" placeholder="your@email.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="field-wrap">
+          <span class="field-icon">🔑</span>
+          <input class="form-input" type="password" id="siPassword" placeholder="••••••••" autocomplete="current-password">
+          <button class="toggle-pw" type="button" onclick="togglePw('siPassword',this)">👁</button>
+        </div>
+      </div>
+      <div class="msg-error" id="siError"></div>
+      <div class="msg-success" id="siSuccess"></div>
+      <button class="submit-btn" id="siBtn" onclick="handleSignIn()">🍛 Sign In · ログイン</button>
+      <div class="form-footer">No account yet? <span onclick="switchTab('signup')">Create one →</span> &nbsp;|&nbsp; <span onclick="openModal()">Request access</span></div>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div id="formSignUp" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.65rem;">
+        <div>
+          <label class="form-label">First Name</label>
+          <div class="field-wrap">
+            <span class="field-icon">👤</span>
+            <input class="form-input" type="text" id="suFirst" placeholder="Hiroshi" autocomplete="given-name">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Last Name</label>
+          <div class="field-wrap">
+            <span class="field-icon">👤</span>
+            <input class="form-input" type="text" id="suLast" placeholder="Tanaka" autocomplete="family-name">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div class="field-wrap">
+          <span class="field-icon">📧</span>
+          <input class="form-input" type="email" id="suEmail" placeholder="your@email.com" autocomplete="email">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="field-wrap">
+          <span class="field-icon">🔑</span>
+          <input class="form-input" type="password" id="suPassword" placeholder="Min. 8 characters" autocomplete="new-password" oninput="checkStrength(this.value)">
+          <button class="toggle-pw" type="button" onclick="togglePw('suPassword',this)">👁</button>
+        </div>
+        <div id="strengthBar"></div>
+        <div id="strengthLabel"></div>
+      </div>
+      <div class="msg-error" id="suError"></div>
+      <div class="msg-success" id="suSuccess"></div>
+      <button class="submit-btn" id="suBtn" onclick="handleSignUp()">🌿 Create Account · 登録</button>
+      <div class="form-footer">Already have an account? <span onclick="switchTab('signin')">Sign in →</span></div>
+    </div>
+
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Access request modal -->
 <div id="modalBg" onclick="if(event.target===this)closeModal()">
   <div id="modal">
     <button id="modalClose" onclick="closeModal()">✕</button>
     <div class="m-icon">🌿</div>
     <div class="m-title">Request Access</div>
-    <div class="m-sub">Fill in your details and we'll get you into the kitchen!</div>
+    <div class="m-sub">Fill in your details and we'll get you set up!</div>
     <div class="m-err" id="mErr"></div>
     <div id="mForm">
       <label>Your Name</label><input type="text" id="mName" placeholder="e.g. Hiroshi Tanaka">
@@ -241,113 +222,263 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
       <label>Message (optional)</label>
       <textarea id="mMsg" placeholder="How did you hear about us?"></textarea>
       <button id="sendBtn" onclick="submitRequest()">📨 Send Request</button>
-      <div class="m-note">We'll email you access details as soon as possible.</div>
+      <div class="m-note">We'll be in touch soon with your access details.</div>
     </div>
     <div class="m-ok" id="mOk">✅ Request sent! We'll be in touch soon.</div>
   </div>
 </div>
 
 <script>
-// ── Cherry blossom petals ─────────────────────────────────────────────────
+// ── Wait for Clerk ─────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  try {
+    await window.Clerk.load();
+    // Already signed in? Go straight to the order form
+    if (window.Clerk.user) {
+      window.location.href = '/';
+    }
+  } catch(e) {
+    console.error('Clerk load error:', e);
+  }
+});
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  const isSignIn = tab === 'signin';
+  document.getElementById('formSignIn').style.display = isSignIn ? 'block' : 'none';
+  document.getElementById('formSignUp').style.display  = isSignIn ? 'none'  : 'block';
+  document.getElementById('tabSignIn').classList.toggle('active',  isSignIn);
+  document.getElementById('tabSignUp').classList.toggle('active', !isSignIn);
+  ['siError','siSuccess','suError','suSuccess'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+  });
+}
+
+// ── Sign In ────────────────────────────────────────────────────────────────
+async function handleSignIn() {
+  const email    = document.getElementById('siEmail').value.trim();
+  const password = document.getElementById('siPassword').value;
+  const errEl    = document.getElementById('siError');
+  const btn      = document.getElementById('siBtn');
+  errEl.style.display = 'none';
+
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password.';
+    errEl.style.display = 'block'; return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Signing in...';
+
+  try {
+    const result = await window.Clerk.client.signIn.create({
+      identifier: email,
+      password: password,
+    });
+    if (result.status === 'complete') {
+      await window.Clerk.setActive({ session: result.createdSessionId });
+      document.getElementById('siSuccess').textContent = '🌸 Welcome back! Redirecting...';
+      document.getElementById('siSuccess').style.display = 'block';
+      launchConfetti();
+      setTimeout(() => window.location.href = '/', 1200);
+    } else {
+      errEl.textContent = 'Sign in incomplete. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '🍛 Sign In · ログイン';
+    }
+  } catch (err) {
+    const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Sign in failed. Please check your credentials.';
+    errEl.textContent = '❌ ' + msg;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '🍛 Sign In · ログイン';
+  }
+}
+
+// ── Sign Up ────────────────────────────────────────────────────────────────
+async function handleSignUp() {
+  const firstName = document.getElementById('suFirst').value.trim();
+  const lastName  = document.getElementById('suLast').value.trim();
+  const email     = document.getElementById('suEmail').value.trim();
+  const password  = document.getElementById('suPassword').value;
+  const errEl     = document.getElementById('suError');
+  const btn       = document.getElementById('suBtn');
+  errEl.style.display = 'none';
+
+  if (!firstName || !lastName || !email || !password) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block'; return;
+  }
+  if (password.length < 8) {
+    errEl.textContent = 'Password must be at least 8 characters.';
+    errEl.style.display = 'block'; return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Creating account...';
+
+  try {
+    const signUp = await window.Clerk.client.signUp.create({
+      firstName, lastName,
+      emailAddress: email,
+      password,
+    });
+    // Trigger email verification
+    await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+    showVerificationStep();
+  } catch (err) {
+    const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Registration failed. Please try again.';
+    errEl.textContent = '❌ ' + msg;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '🌿 Create Account · 登録';
+  }
+}
+
+// ── Email verification step ───────────────────────────────────────────────
+function showVerificationStep() {
+  document.getElementById('formSignUp').innerHTML = `
+    <div style="text-align:center;margin-bottom:1rem;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">📧</div>
+      <div style="color:white;font-size:13px;font-weight:600;margin-bottom:6px;">Check your inbox</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:11px;line-height:1.5;">
+        We sent a 6-digit code to your email.<br>Enter it below to complete registration.
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Verification Code</label>
+      <div class="field-wrap">
+        <span class="field-icon">✉️</span>
+        <input class="form-input" type="text" id="verifyCode" placeholder="123456"
+          maxlength="6" style="text-align:center;letter-spacing:0.3em;font-size:16px;"
+          oninput="if(this.value.length===6)handleVerify()">
+      </div>
+    </div>
+    <div class="msg-error" id="verifyError"></div>
+    <div class="msg-success" id="verifySuccess"></div>
+    <button class="submit-btn" id="verifyBtn" onclick="handleVerify()">✅ Verify & Enter</button>
+    <div class="form-footer"><span onclick="resendCode()">Resend code →</span></div>
+  `;
+  document.getElementById('verifyCode')?.focus();
+}
+
+async function handleVerify() {
+  const code  = (document.getElementById('verifyCode')?.value || '').trim();
+  const errEl = document.getElementById('verifyError');
+  const btn   = document.getElementById('verifyBtn');
+  if (!errEl || !btn) return;
+  errEl.style.display = 'none';
+
+  if (!code || code.length < 6) {
+    errEl.textContent = 'Please enter the 6-digit code.';
+    errEl.style.display = 'block'; return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Verifying...';
+
+  try {
+    const result = await window.Clerk.client.signUp.attemptEmailAddressVerification({ code });
+    if (result.status === 'complete') {
+      await window.Clerk.setActive({ session: result.createdSessionId });
+      document.getElementById('verifySuccess').textContent = '🌸 Account created! Redirecting...';
+      document.getElementById('verifySuccess').style.display = 'block';
+      launchConfetti();
+      setTimeout(() => window.location.href = '/', 1500);
+    } else {
+      errEl.textContent = 'Verification incomplete. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '✅ Verify & Enter';
+    }
+  } catch (err) {
+    const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Invalid code. Please try again.';
+    errEl.textContent = '❌ ' + msg;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '✅ Verify & Enter';
+  }
+}
+
+async function resendCode() {
+  try {
+    await window.Clerk.client.signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+    alert('Code resent! Check your email.');
+  } catch(e) { alert('Could not resend. Please try again.'); }
+}
+
+// ── Password strength ──────────────────────────────────────────────────────
+function checkStrength(pw) {
+  const bar   = document.getElementById('strengthBar');
+  const label = document.getElementById('strengthLabel');
+  if (!pw) { bar.style.background = 'transparent'; label.style.display = 'none'; return; }
+  label.style.display = 'block';
+  const score = [pw.length >= 8, /[A-Z]/.test(pw), /[a-z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].filter(Boolean).length;
+  if (score <= 2)      { bar.style.background='#ff4444'; bar.style.width='33%'; label.textContent='⚠️ Weak'; label.style.color='#ff8888'; }
+  else if (score <= 3) { bar.style.background='#ffaa00'; bar.style.width='66%'; label.textContent='👍 Fair'; label.style.color='#ffcc66'; }
+  else                 { bar.style.background='#44cc88'; bar.style.width='100%'; label.textContent='✅ Strong'; label.style.color='#afffcc'; }
+}
+
+// ── Password toggle ────────────────────────────────────────────────────────
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+// ── Confetti ───────────────────────────────────────────────────────────────
+function launchConfetti() {
+  const colors = ['#f8b4c8','#7ec850','#fff','#ffcc44','#ff6b9d','#afffaa','#c9a84c'];
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    const s = 4 + Math.random() * 10;
+    c.style.cssText = `left:${Math.random()*100}%;top:-20px;width:${s}px;height:${s}px;background:${colors[i%7]};border-radius:${Math.random()>0.5?'50%':'2px'};animation:confetti-drop ${1.2+Math.random()}s ${Math.random()*0.8}s ease-in forwards;`;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2500);
+  }
+}
+
+// ── Cherry blossoms ────────────────────────────────────────────────────────
 const blossomEl = document.getElementById('blossoms');
-const petalTypes = ['🌸','🌸','🌺','🌸','🌸'];
-for (let i=0; i<25; i++) {
+for (let i = 0; i < 22; i++) {
   const p = document.createElement('div');
   p.className = 'petal';
-  p.textContent = petalTypes[i % petalTypes.length];
-  const size = 0.7 + Math.random() * 0.9;
-  p.style.cssText = `
-    font-size:${size}rem;
-    left:${Math.random()*100}%;
-    animation-duration:${7+Math.random()*8}s;
-    animation-delay:${Math.random()*8}s;
-    opacity:${0.5+Math.random()*0.4};
-  `;
+  p.textContent = ['🌸','🌸','🌺','🌸'][i % 4];
+  p.style.cssText = `font-size:${0.7+Math.random()*0.9}rem;left:${Math.random()*100}%;animation-duration:${7+Math.random()*8}s;animation-delay:${Math.random()*8}s;opacity:${0.5+Math.random()*0.4};`;
   blossomEl.appendChild(p);
 }
 
-// ── Password ──────────────────────────────────────────────────────────────
-function togglePw() {
-  const i=document.getElementById('pwInput');
-  const b=document.getElementById('pwToggle');
-  i.type=i.type==='password'?'text':'password';
-  b.textContent=i.type==='password'?'👁':'🙈';
-}
-document.getElementById('pwInput').addEventListener('keydown', e => {
-  if (e.key==='Enter') handleLogin();
-  document.getElementById('pwError').style.display='none';
+// ── Enter key ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('formSignIn').style.display !== 'none') { handleSignIn(); return; }
+  if (document.getElementById('verifyCode')) { handleVerify(); return; }
+  handleSignUp();
 });
 
-async function handleLogin() {
-  const pw=document.getElementById('pwInput').value;
-  const btn=document.getElementById('loginBtn');
-  const err=document.getElementById('pwError');
-  const card=document.getElementById('loginCard');
-  if (!pw) return;
-  btn.disabled=true; btn.textContent='⏳ 確認中...'; err.style.display='none';
+// ── Access request modal ───────────────────────────────────────────────────
+function openModal()  { document.getElementById('modalBg').classList.add('open'); document.getElementById('mName').focus(); }
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+
+async function submitRequest() {
+  const name  = document.getElementById('mName').value.trim();
+  const email = document.getElementById('mEmail').value.trim();
+  const msg   = document.getElementById('mMsg').value.trim();
+  const err   = document.getElementById('mErr');
+  const btn   = document.getElementById('sendBtn');
+  err.style.display = 'none';
+  if (!name || !email) { err.textContent = 'Please fill in your name and email.'; err.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = '⏳ Sending...';
   try {
-    const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    const res  = await fetch('/api/access-request', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,message:msg}) });
+    const data = await res.json();
     if (res.ok) {
-      const{token}=await res.json();
-      sessionStorage.setItem('spiceblend_token',token);
-      launchConfetti();
-      document.getElementById('pwInput').style.display='none';
-      document.getElementById('pwToggle').style.display='none';
-      btn.style.display='none';
-      document.querySelector('.input-wrap').style.display='none';
-      document.querySelector('.access-link').style.display='none';
-      document.getElementById('successMsg').style.display='block';
-      setTimeout(()=>window.location.href='/',1500);
+      document.getElementById('mForm').style.display = 'none';
+      document.getElementById('mOk').style.display = 'block';
+      setTimeout(closeModal, 2500);
     } else {
-      err.style.display='block';
-      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
-      document.getElementById('pwInput').value='';
-      document.getElementById('pwInput').focus();
-      btn.disabled=false; btn.textContent='今すぐ注文する 🍛';
+      err.textContent = data.error || 'Something went wrong.';
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = '📨 Send Request';
     }
   } catch(e) {
-    err.textContent='⚠️ Connection error.'; err.style.display='block';
-    btn.disabled=false; btn.textContent='今すぐ注文する 🍛';
+    err.textContent = '⚠️ Connection error. Please try again.';
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = '📨 Send Request';
   }
 }
-
-// ── Confetti ──────────────────────────────────────────────────────────────
-function launchConfetti() {
-  const colors=['#f8b4c8','#7ec850','#fff','#ffcc44','#ff6b9d','#afffaa','#c9a84c'];
-  for (let i=0;i<120;i++) {
-    const c=document.createElement('div');
-    c.className='confetti-piece';
-    const s=4+Math.random()*10;
-    c.style.cssText=`left:${Math.random()*100}%;top:-20px;width:${s}px;height:${s}px;background:${colors[i%7]};border-radius:${Math.random()>0.5?'50%':'2px'};animation:confetti-drop ${1.2+Math.random()}s ${Math.random()*0.8}s ease-in forwards;`;
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),2500);
-  }
-}
-
-// ── Modal ─────────────────────────────────────────────────────────────────
-function openModal(){document.getElementById('modalBg').classList.add('open');document.getElementById('mName').focus();}
-function closeModal(){document.getElementById('modalBg').classList.remove('open');}
-async function submitRequest(){
-  const name=document.getElementById('mName').value.trim();
-  const email=document.getElementById('mEmail').value.trim();
-  const msg=document.getElementById('mMsg').value.trim();
-  const err=document.getElementById('mErr');
-  const btn=document.getElementById('sendBtn');
-  err.style.display='none';
-  if(!name||!email){err.textContent='Please fill in your name and email.';err.style.display='block';return;}
-  btn.disabled=true;btn.textContent='⏳ Sending...';
-  try{
-    const res=await fetch('/api/access-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message:msg})});
-    const data=await res.json();
-    if(res.ok){document.getElementById('mForm').style.display='none';document.getElementById('mOk').style.display='block';setTimeout(closeModal,2500);}
-    else{err.textContent=data.error||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='📨 Send Request';}
-  }catch(e){err.textContent='⚠️ Connection error.';err.style.display='block';btn.disabled=false;btn.textContent='📨 Send Request';}
-}
-
-// ── Auth check ────────────────────────────────────────────────────────────
-if(sessionStorage.getItem('spiceblend_token'))window.location.href='/';
-const pEl=document.getElementById('pwInput');
-if(pEl)pEl.focus();
 </script>
 </body>
 </html>
