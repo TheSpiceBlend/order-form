@@ -266,6 +266,12 @@ waitForClerk().then(clerk => {
   }
 }).catch(e => {
   console.error('Clerk load error:', e);
+  // Show visible error on page so we can diagnose without DevTools
+  const errEl = document.getElementById('siError') || document.getElementById('suError');
+  if (errEl) {
+    errEl.textContent = '⚠️ Auth service failed to load: ' + (e?.message || String(e));
+    errEl.style.display = 'block';
+  }
 });
 
 // ── Tab switching ──────────────────────────────────────────────────────────
@@ -353,7 +359,10 @@ async function handleSignUp() {
     showVerificationStep();
   } catch (err) {
     console.error('Sign up error:', err);
-    const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Registration failed. Please try again.';
+    // Show the most specific error message available, including raw error for debugging
+    const clerkMsg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message;
+    const rawMsg = err?.message || String(err);
+    const msg = clerkMsg || rawMsg || 'Registration failed. Please try again.';
     errEl.textContent = '❌ ' + msg;
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = '🌿 Create Account · 登録';
