@@ -46,8 +46,10 @@ module.exports = async (req, res) => {
 
   try {
     // Parse Google service account key
+    // GOOGLE_SERVICE_ACCOUNT_KEY may be stored as raw JSON or base64 — handle both
+    const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || '';
     const keyJson = JSON.parse(
-      Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf8')
+      rawKey.trimStart().startsWith('{') ? rawKey : Buffer.from(rawKey, 'base64').toString('utf8')
     );
     const auth = new google.auth.GoogleAuth({
       credentials: keyJson,
