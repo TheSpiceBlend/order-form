@@ -28,16 +28,20 @@ export default async function handler(req, res) {
 
   const {
     orderRef,
-    customer,   // { name, email, phone, address, notes }
+    customer,   // { firstName, lastName, email, phone }
     products,   // [{ id, name, price, qty }]
     total,
+    notes,      // top-level string
     submittedAt,
   } = req.body || {};
 
   // ── Validate required fields ──────────────────────────────────────────────
-  if (!orderRef || !customer?.name || !customer?.email || !products?.length || !total) {
+  if (!orderRef || !customer?.email || !products?.length || !total) {
     return res.status(400).json({ error: 'Missing required order fields' });
   }
+
+  // Build a display name from firstName + lastName
+  const customerName = [customer.firstName, customer.lastName].filter(Boolean).join(' ') || customer.email;
 
   // ── 1. Append to Google Sheet ─────────────────────────────────────────────
   try {
@@ -56,11 +60,10 @@ export default async function handler(req, res) {
     const row = [
       orderRef,
       submittedAt || new Date().toISOString(),
-      customer.name,
+      customerName,
       customer.email,
       customer.phone || '',
-      customer.address || '',
-      customer.notes || '',
+      notes || '',
       itemsSummary,
       `¥${Number(total).toLocaleString()}`,
       'New',   // status column
@@ -98,7 +101,7 @@ export default async function handler(req, res) {
       <p style="margin:6px 0 0;color:rgba(255,255,255,0.75);font-size:13px;">Kerala flavours in Tokyo</p>
     </div>
     <div style="padding:28px 32px;">
-      <p style="font-size:15px;color:#1a3a1a;margin:0 0 6px;">Hi ${customer.name},</p>
+      <p style="font-size:15px;color:#1a3a1a;margin:0 0 6px;">Hi ${customerName},</p>
       <p style="font-size:14px;color:#444;margin:0 0 24px;">Thanks for your order! We've received it and will be in touch shortly to confirm pickup/delivery details.</p>
 
       <div style="background:#f4f9f4;border-radius:8px;padding:16px;margin-bottom:20px;">
@@ -122,8 +125,7 @@ export default async function handler(req, res) {
         <span style="font-size:18px;font-weight:700;color:#1a6b30;">¥${Number(total).toLocaleString()}</span>
       </div>
 
-      ${customer.address ? `<p style="font-size:13px;color:#555;margin:20px 0 0;"><strong>Delivery address:</strong> ${customer.address}</p>` : ''}
-      ${customer.notes ? `<p style="font-size:13px;color:#555;margin:8px 0 0;"><strong>Notes:</strong> ${customer.notes}</p>` : ''}
+      ${notes ? `<p style="font-size:13px;color:#555;margin:20px 0 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
 
       <p style="font-size:13px;color:#888;margin:24px 0 0;line-height:1.6;">If you have any questions, just reply to this email.<br>We'll see you soon! 🌶️</p>
     </div>
@@ -139,10 +141,9 @@ export default async function handler(req, res) {
 <html>
 <body style="font-family:Arial,sans-serif;padding:20px;color:#333;">
   <h2 style="color:#1a6b30;">🛒 New Order: ${orderRef}</h2>
-  <p><strong>Customer:</strong> ${customer.name} &lt;${customer.email}&gt;</p>
+  <p><strong>Customer:</strong> ${customerName} &lt;${customer.email}&gt;</p>
   ${customer.phone ? `<p><strong>Phone:</strong> ${customer.phone}</p>` : ''}
-  ${customer.address ? `<p><strong>Address:</strong> ${customer.address}</p>` : ''}
-  ${customer.notes ? `<p><strong>Notes:</strong> ${customer.notes}</p>` : ''}
+  ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
   <hr style="border:1px solid #e8f5e9;margin:16px 0;">
   <table style="width:100%;border-collapse:collapse;">
     ${products.map(p => `
@@ -174,6 +175,7 @@ export default async function handler(req, res) {
         from: process.env.FROM_EMAIL,
         to: customer.email,
         subject: `Your order is confirmed — ${orderRef} 🍛`,
+        reply_to: process.env.ADMIN_EMAIL,
         html: customerEmailHtml,
       }),
     });
@@ -196,7 +198,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: process.env.FROM_EMAIL,
         to: process.env.ADMIN_EMAIL,
-        subject: `New order: ${orderRef} from ${customer.name}`,
+        subject: `New order: ${orderRef} from ${customerName}`,
         html: adminEmailHtml,
       }),
     });
