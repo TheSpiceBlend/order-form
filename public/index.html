@@ -914,7 +914,11 @@ async function submitOrder() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error('Server error');
+    if (!res.ok) {
+      let detail = '';
+      try { const d = await res.json(); detail = d.error || d.detail || JSON.stringify(d); } catch {}
+      throw new Error(`Server error ${res.status}${detail ? ': ' + detail : ''}`);
+    }
     localStorage.setItem('spiceblend_customer', JSON.stringify({ firstName, lastName, email, phone }));
     document.getElementById('orderRef').textContent = orderRef;
     document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
@@ -922,7 +926,7 @@ async function submitOrder() {
   } catch (err) {
     btn.disabled = false;
     btn.textContent = '🛒 Place Order';
-    showError('Something went wrong. Please try again.');
+    showError(err.message || 'Something went wrong. Please try again.');
   }
 }
 
