@@ -1,10 +1,12 @@
 {
-  "outputDirectory": "public",
+  "functions": {
+    "api/*.js": { "runtime": "@vercel/node@3.x" }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
-    { "src": "/login", "dest": "/login.html" },
-    { "src": "/orders", "dest": "/orders.html" },
-    { "src": "/print-stickers", "dest": "/print-stickers.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/login", "dest": "/public/login.html" },
+    { "src": "/orders", "dest": "/public/orders.html" },
+    { "src": "/print-stickers", "dest": "/public/print-stickers.html" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
   ]
 }
