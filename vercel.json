@@ -7,14 +7,18 @@
     { "src": "api/order.js", "use": "@vercel/node" },
     { "src": "api/auth.js", "use": "@vercel/node" },
     { "src": "api/access-request.js", "use": "@vercel/node" },
-    { "src": "api/verify.js", "use": "@vercel/node" }
+    { "src": "api/verify.js", "use": "@vercel/node" },
+    { "src": "api/my-orders.js", "use": "@vercel/node" },
+    { "src": "public/orders.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/auth", "dest": "/api/auth.js" },
     { "src": "/api/order", "dest": "/api/order.js" },
     { "src": "/api/access-request", "dest": "/api/access-request.js" },
     { "src": "/api/verify", "dest": "/api/verify.js" },
+    { "src": "/api/my-orders", "dest": "/api/my-orders.js" },
     { "src": "/login", "dest": "/public/login.html" },
+    { "src": "/orders", "dest": "/public/orders.html" },
     { "src": "/print-stickers", "dest": "/public/print-stickers.html" },
     { "src": "/(.*)", "dest": "/public/index.html" }
   ]
