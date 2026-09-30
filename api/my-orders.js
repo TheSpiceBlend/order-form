@@ -1,0 +1,81 @@
+// api/my-orders.js
+// Returns the logged-in customer's orders from Google Sheets.
+// Requires: CLERK_SECRET_KEY, GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_KEY
+
+const { google } = require('googleapis');
+
+async function getClerkEmail(authHeader) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+  try {
+    const res = await fetch(`https://api.clerk.com/v1/sessions/${token}/verify`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.response?.user?.email_addresses?.[0]?.email_address || null;
+  } catch {
+    return null;
+  }
+}
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  // Verify Clerk session
+  const email = await getClerkEmail(req.headers['authorization']);
+  if (!email) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    // Parse Google service account key
+    const keyJson = JSON.parse(
+      Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_KEY, 'base64').toString('utf8')
+    );
+    const auth = new google.auth.GoogleAuth({
+      credentials: keyJson,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    });
+    const sheets = google.sheets({ version: 'v4', auth });
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: 'Sheet1!A:Z', // grab all columns
+    });
+
+    const rows = response.data.values || [];
+    if (rows.length < 2) return res.status(200).json({ orders: [] });
+
+    // First row = headers
+    const headers = rows[0].map(h => h.toLowerCase().trim());
+
+    // Find the email column (look for "email" in headers)
+    const emailCol = headers.findIndex(h => h.includes('email'));
+    if (emailCol === -1) return res.status(200).json({ orders: [], note: 'No email column found in sheet' });
+
+    // Filter rows for this customer
+    const customerRows = rows.slice(1).filter(row => {
+      const rowEmail = (row[emailCol] || '').trim().toLowerCase();
+      return rowEmail === email.toLowerCase();
+    });
+
+    // Build order objects from headers
+    const orders = customerRows.map(row => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+      return obj;
+    }).reverse(); // newest first
+
+    res.status(200).json({ orders, email });
+  } catch (err) {
+    console.error('my-orders error:', err);
+    res.status(500).json({ error: 'Failed to fetch orders', detail: err.message });
+  }
+};
