@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <!-- Clerk auth — same key as login.html -->
 <script async crossorigin="anonymous"
-  src="https://clerk.thespiceblend.com/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
   data-clerk-publishable-key="pk_live_Y2xlcmsudGhlc3BpY2VibGVuZC5jb20k">
 </script>
 <style>
@@ -654,6 +654,7 @@
 
 <!-- Signed-in user bar -->
 <div id="userBar" style="display:none">
+  <a href="/orders" id="ordersLink" style="display:inline-block;padding:7px 16px;border-radius:20px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;">🧾 My Orders</a>
   <button onclick="signOut()">Sign out</button>
 </div>
 
