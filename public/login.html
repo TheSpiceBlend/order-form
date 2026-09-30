@@ -303,18 +303,26 @@ async function handleSignIn() {
 
   try {
     const clerk = await waitForClerk();
-    const result = await clerk.client.signIn.create({
+    let result = await clerk.client.signIn.create({
       identifier: email,
       password: password,
     });
+    // If Clerk needs a first factor step (e.g. password wasn't enough yet), attempt it
+    if (result.status === 'needs_first_factor') {
+      result = await result.attemptFirstFactor({ strategy: 'password', password });
+    }
     if (result.status === 'complete') {
       await clerk.setActive({ session: result.createdSessionId });
       document.getElementById('siSuccess').textContent = '🌸 Welcome back! Redirecting...';
       document.getElementById('siSuccess').style.display = 'block';
       launchConfetti();
       setTimeout(() => window.location.href = '/', 1200);
+    } else if (result.status === 'needs_second_factor') {
+      errEl.textContent = '🔐 Two-factor authentication is required. Please disable MFA in your account or contact the administrator.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '🍛 Sign In · ログイン';
     } else {
-      errEl.textContent = 'Sign in incomplete. Please try again.';
+      errEl.textContent = 'Sign in incomplete (status: ' + result.status + '). Please try again.';
       errEl.style.display = 'block';
       btn.disabled = false; btn.textContent = '🍛 Sign In · ログイン';
     }
