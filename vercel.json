@@ -1,7 +1,4 @@
 {
-  "functions": {
-    "api/*.js": {}
-  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
     { "src": "/login", "dest": "/public/login.html" },
