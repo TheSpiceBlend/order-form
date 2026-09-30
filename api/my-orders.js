@@ -13,7 +13,9 @@ async function getClerkEmail(authHeader) {
     // which implicitly confirms the token is valid (issued by our instance).
     const parts = token.split('.');
     if (parts.length !== 3) return null;
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+    // base64url → base64: replace URL-safe chars and pad to multiple of 4
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(parts[1].length / 4) * 4, '=');
+    const payload = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
     const userId = payload.sub;
     if (!userId) return null;
 
