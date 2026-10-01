@@ -169,7 +169,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
       <div style="text-align:center;margin-bottom:0.8rem;">
         <div style="font-size:1.5rem;">🔐</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:3px;">Two-Factor Authentication</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.45);">Enter the 6-digit code from your authenticator app</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.45);" id="totpHint">Enter the 6-digit code from your authenticator app</div>
       </div>
       <div class="form-group">
         <label class="form-label">Authenticator Code</label>
@@ -339,6 +339,21 @@ async function handleSignIn() {
       setTimeout(() => window.location.href = '/', 1200);
     } else if (result.status === 'needs_second_factor') {
         window._pendingSignIn = result;
+        // Detect strategy and prepare if needed (phone/email need a send step; totp does not)
+        const supported = result.supportedSecondFactors || [];
+        const strategy = supported.length > 0 ? supported[0].strategy : 'totp';
+        window._2faStrategy = strategy;
+        const hintEl = document.getElementById('totpHint');
+        if (strategy === 'phone_code' || strategy === 'email_code') {
+          try {
+            await result.prepareSecondFactor({ strategy });
+            if (hintEl) hintEl.textContent = strategy === 'phone_code'
+              ? '📱 A code was sent to your phone — enter it below'
+              : '📧 A code was sent to your email — enter it below';
+          } catch(e) { console.warn('prepare failed', e); }
+        } else {
+          if (hintEl) hintEl.textContent = 'Enter the 6-digit code from your authenticator app';
+        }
         document.getElementById('formSignIn').style.display = 'none';
         document.getElementById('formTotp').style.display = 'block';
         document.getElementById('totpCode').focus();
@@ -526,8 +541,7 @@ async function handleTotp() {
   try {
     const clerk = await waitForClerk();
     const signIn = window._pendingSignIn || clerk.client.signIn;
-    const supported = signIn.supportedSecondFactors || [];
-    const strategy = supported.length > 0 ? supported[0].strategy : 'totp';
+    const strategy = window._2faStrategy || 'totp';
     const result = await signIn.attemptSecondFactor({ strategy, code });
     if (result.status === 'complete') {
       await clerk.setActive({ session: result.createdSessionId });
