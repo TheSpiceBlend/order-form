@@ -9,9 +9,38 @@
  *   RESEND_API_KEY              → Resend API key for email
  *   FROM_EMAIL                  → Sender email address (e.g. orders@thespiceblend.com)
  *   ADMIN_EMAIL                 → Admin/owner email to receive order notifications
+ *   CLERK_SECRET_KEY             → Clerk secret key used to verify session tokens
+ *   CLERK_AUTHORIZED_PARTIES     → Optional comma-separated allowed Clerk origins
+ *                                  (recommended: https://thespiceblend.com)
  */
 
 import { google } from 'googleapis';
+import { verifyToken } from '@clerk/backend';
+
+async function getAuthenticatedUserId(req) {
+  const authHeader = req.headers['authorization'] || '';
+  if (!authHeader.startsWith('Bearer ')) return null;
+
+  const token = authHeader.slice(7).trim();
+  if (!token || !process.env.CLERK_SECRET_KEY) return null;
+
+  try {
+    const authorizedParties = (process.env.CLERK_AUTHORIZED_PARTIES || '')
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+      ...(authorizedParties.length ? { authorizedParties } : {}),
+    });
+
+    return payload?.sub || null;
+  } catch (err) {
+    console.error('Clerk token verification failed:', err);
+    return null;
+  }
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,6 +64,12 @@ export default async function handler(req, res) {
     submittedAt,
   } = req.body || {};
 
+  // ── Authenticate the signed-in Clerk user ────────────────────────────────
+  const clerkUserId = await getAuthenticatedUserId(req);
+  if (!clerkUserId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
   // ── Validate required fields ──────────────────────────────────────────────
   if (!orderRef || !customer?.email || !products?.length || !total) {
     return res.status(400).json({ error: 'Missing required order fields' });
@@ -57,6 +92,52 @@ export default async function handler(req, res) {
       .map(p => `${p.name} x${p.qty} (¥${(p.price * p.qty).toLocaleString()})`)
       .join(' | ');
 
+    // Keep the existing A:I order columns unchanged and store the Clerk user ID
+    // in the first available column from J onward. This avoids changing any
+    // existing order fields.
+    const headerResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: 'Sheet1!A:Z',
+    });
+
+    const headerRow = headerResponse.data.values?.[0] || [];
+    const normalizedHeaders = headerRow.map(h => String(h || '').trim().toLowerCase());
+
+    let clerkUserIdCol = -1;
+    for (let i = 9; i < normalizedHeaders.length; i++) {
+      if (['clerkuserid', 'clerk user id', 'clerk_user_id'].includes(normalizedHeaders[i])) {
+        clerkUserIdCol = i;
+        break;
+      }
+    }
+
+    if (clerkUserIdCol === -1) {
+      // Prefer J (index 9). If J already has another header, use the first
+      // empty column after J.
+      clerkUserIdCol = 9;
+      while (clerkUserIdCol < normalizedHeaders.length && normalizedHeaders[clerkUserIdCol]) {
+        clerkUserIdCol++;
+      }
+
+      const columnLetter = (() => {
+        let n = clerkUserIdCol + 1;
+        let s = '';
+        while (n > 0) {
+          const rem = (n - 1) % 26;
+          s = String.fromCharCode(65 + rem) + s;
+          n = Math.floor((n - 1) / 26);
+        }
+        return s;
+      })();
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: `Sheet1!${columnLetter}1`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [['clerkUserId']] },
+      });
+    }
+
     const row = [
       orderRef,
       submittedAt || new Date().toISOString(),
@@ -66,12 +147,26 @@ export default async function handler(req, res) {
       notes || '',
       itemsSummary,
       `¥${Number(total).toLocaleString()}`,
-      'New',   // status column
+      'New',
     ];
+
+    while (row.length < clerkUserIdCol) row.push('');
+    row[clerkUserIdCol] = clerkUserId;
+
+    const endCol = (() => {
+      let n = row.length;
+      let s = '';
+      while (n > 0) {
+        const rem = (n - 1) % 26;
+        s = String.fromCharCode(65 + rem) + s;
+        n = Math.floor((n - 1) / 26);
+      }
+      return s;
+    })();
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Sheet1!A:J',
+      range: `Sheet1!A:${endCol}`,
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [row] },
     });
