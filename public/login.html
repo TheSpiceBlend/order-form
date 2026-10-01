@@ -332,6 +332,8 @@ async function handleSignIn() {
 }
 
 // ââ Sign Up ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+let _signUpAttempt = null;
+
 async function handleSignUp() {
   const firstName = document.getElementById('suFirst').value.trim();
   const lastName  = document.getElementById('suLast').value.trim();
@@ -353,13 +355,13 @@ async function handleSignUp() {
 
   try {
     const clerk = await waitForClerk();
-    const signUp = await clerk.client.signUp.create({
+    _signUpAttempt = await clerk.client.signUp.create({
       firstName, lastName,
       emailAddress: email,
       password,
     });
     // Trigger email verification
-    await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+    await _signUpAttempt.prepareEmailAddressVerification({ strategy: 'email_code' });
     showVerificationStep();
   } catch (err) {
     console.error('Sign up error:', err);
@@ -415,7 +417,8 @@ async function handleVerify() {
 
   try {
     const clerk = await waitForClerk();
-    const result = await clerk.client.signUp.attemptEmailAddressVerification({ code });
+    const signUpObj = _signUpAttempt || clerk.client.signUp;
+    const result = await signUpObj.attemptEmailAddressVerification({ code });
     if (result.status === 'complete') {
       await clerk.setActive({ session: result.createdSessionId });
       document.getElementById('verifySuccess').textContent = 'ð¸ Account created! Redirecting...';
@@ -439,7 +442,8 @@ async function handleVerify() {
 async function resendCode() {
   try {
     const clerk = await waitForClerk();
-    await clerk.client.signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+    const signUpObj = _signUpAttempt || clerk.client.signUp;
+    await signUpObj.prepareEmailAddressVerification({ strategy: 'email_code' });
     alert('Code resent! Check your email.');
   } catch(e) { alert('Could not resend. Please try again.'); }
 }
