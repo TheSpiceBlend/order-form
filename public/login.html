@@ -311,6 +311,14 @@ async function handleSignIn() {
     if (result.status === 'needs_first_factor') {
       result = await result.attemptFirstFactor({ strategy: 'password', password });
     }
+    // If Clerk requires a second factor (email code 2FA), show inline code input
+    if (result.status === 'needs_second_factor') {
+      _signInAttempt = result;
+      await result.prepareSecondFactor({ strategy: 'email_code' });
+      showSignIn2FAStep();
+      btn.disabled = false; btn.textContent = 'ð Sign In Â· ã­ã°ã¤ã³';
+      return;
+    }
     if (result.status === 'complete') {
       await clerk.setActive({ session: result.createdSessionId });
       document.getElementById('siSuccess').textContent = 'ð¸ Welcome back! Redirecting...';
@@ -329,6 +337,68 @@ async function handleSignIn() {
     errEl.style.display = 'block';
     btn.disabled = false; btn.textContent = 'ð Sign In Â· ã­ã°ã¤ã³';
   }
+}
+
+// ââ Sign In 2FA ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+let _signInAttempt = null;
+
+function showSignIn2FAStep() {
+  document.getElementById('formSignIn').innerHTML = `
+    <h2 class="form-title">âï¸ Check Your Email</h2>
+    <p style="color:var(--text-muted);margin-bottom:1.2rem;text-align:center;">
+      We sent a verification code to your email. Enter it below to sign in.
+    </p>
+    <div class="field-wrap">
+      <span class="field-icon">âï¸</span>
+      <input class="form-input" type="text" id="si2faCode" placeholder="123456"
+        maxlength="6" style="text-align:center;letter-spacing:0.3em;font-size:16px;"
+        oninput="if(this.value.length===6)handleSignIn2FA()">
+    </div>
+    <div class="msg-error" id="si2faError"></div>
+    <button class="submit-btn" id="si2faBtn" onclick="handleSignIn2FA()">â Verify & Sign In</button>
+    <div class="form-footer"><span onclick="resendSignIn2FA()">Resend code â©</span></div>
+  `;
+  document.getElementById('si2faCode')?.focus();
+}
+
+async function handleSignIn2FA() {
+  const code  = (document.getElementById('si2faCode')?.value || '').trim();
+  const errEl = document.getElementById('si2faError');
+  const btn   = document.getElementById('si2faBtn');
+  if (!errEl || !btn) return;
+  errEl.style.display = 'none';
+  if (!code || code.length < 6) {
+    errEl.textContent = 'Please enter the 6-digit code.';
+    errEl.style.display = 'block'; return;
+  }
+  btn.disabled = true; btn.textContent = 'â³ Verifying...';
+  try {
+    const clerk  = await waitForClerk();
+    const result = await _signInAttempt.attemptSecondFactor({ strategy: 'email_code', code });
+    if (result.status === 'complete') {
+      await clerk.setActive({ session: result.createdSessionId });
+      document.getElementById('formSignIn').innerHTML += '<div class="msg-success" style="display:block">ð¸ Welcome back! Redirecting...</div>';
+      launchConfetti();
+      setTimeout(() => window.location.href = '/', 1200);
+    } else {
+      errEl.textContent = 'Verification incomplete. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'â Verify & Sign In';
+    }
+  } catch (err) {
+    console.error('2FA error:', err);
+    const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Invalid code. Please try again.';
+    errEl.textContent = 'â ' + msg;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'â Verify & Sign In';
+  }
+}
+
+async function resendSignIn2FA() {
+  try {
+    await _signInAttempt.prepareSecondFactor({ strategy: 'email_code' });
+    alert('Code resent! Check your email.');
+  } catch(e) { alert('Could not resend. Please try again.'); }
 }
 
 // ââ Sign Up ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -467,7 +537,7 @@ function togglePw(id, btn) {
   btn.textContent = inp.type === 'password' ? 'ð' : 'ð';
 }
 
-// ââ Confetti âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ Confetti âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function launchConfetti() {
   const colors = ['#f8b4c8','#7ec850','#fff','#ffcc44','#ff6b9d','#afffaa','#c9a84c'];
   for (let i = 0; i < 100; i++) {
