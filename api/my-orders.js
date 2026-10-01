@@ -10,26 +10,29 @@
  */
 
 import { google } from 'googleapis';
+import { verifyToken } from '@clerk/backend';
 
-async function getClerkEmail(authHeader) {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
+async function getAuthenticatedUserId(req) {
+  const authHeader = req.headers['authorization'] || '';
+  if (!authHeader.startsWith('Bearer ')) return null;
+
+  const token = authHeader.slice(7).trim();
+  if (!token || !process.env.CLERK_SECRET_KEY) return null;
+
   try {
-    // Decode JWT payload to get userId (sub), then fetch user from Clerk API
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(parts[1].length / 4) * 4, '=');
-    const payload = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
-    const userId = payload.sub;
-    if (!userId) return null;
+    const authorizedParties = (process.env.CLERK_AUTHORIZED_PARTIES || '')
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
 
-    const res = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
-      headers: { 'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}` },
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+      ...(authorizedParties.length ? { authorizedParties } : {}),
     });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.email_addresses?.[0]?.email_address || null;
-  } catch {
+
+    return payload?.sub || null;
+  } catch (err) {
+    console.error('Clerk token verification failed:', err);
     return null;
   }
 }
@@ -41,8 +44,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const email = await getClerkEmail(req.headers['authorization']);
-  if (!email) return res.status(401).json({ error: 'Not authenticated' });
+  const clerkUserId = await getAuthenticatedUserId(req);
+  if (!clerkUserId) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
     const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || '';
@@ -63,12 +66,20 @@ export default async function handler(req, res) {
     const rows = response.data.values || [];
     if (rows.length < 2) return res.status(200).json({ orders: [] });
 
-    const headers = rows[0].map(h => h.toLowerCase().trim());
-    const emailCol = headers.findIndex(h => h.includes('email'));
-    if (emailCol === -1) return res.status(200).json({ orders: [], note: 'No email column found' });
+    const headers = rows[0].map(h => String(h || '').toLowerCase().trim());
+    const clerkUserIdCol = headers.findIndex(
+      h => h === 'clerkuserid' || h === 'clerk user id' || h === 'clerk_user_id'
+    );
+
+    if (clerkUserIdCol === -1) {
+      return res.status(200).json({
+        orders: [],
+        note: 'No clerkUserId column found. New orders will create this column automatically.'
+      });
+    }
 
     const customerRows = rows.slice(1).filter(row =>
-      (row[emailCol] || '').trim().toLowerCase() === email.toLowerCase()
+      (row[clerkUserIdCol] || '').trim() === clerkUserId
     );
 
     const orders = customerRows.map(row => {
@@ -77,7 +88,7 @@ export default async function handler(req, res) {
       return obj;
     }).reverse(); // newest first
 
-    return res.status(200).json({ orders, email });
+    return res.status(200).json({ orders });
   } catch (err) {
     console.error('my-orders error:', err);
     return res.status(500).json({ error: 'Failed to fetch orders', detail: err.message });
