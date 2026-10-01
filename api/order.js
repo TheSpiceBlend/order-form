@@ -80,64 +80,48 @@ export default async function handler(req, res) {
 
   // ── 1. Append to Google Sheet ─────────────────────────────────────────────
   try {
-    const keyJson = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+    const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || '';
+    if (!rawKey) throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY is not configured.');
+    if (!process.env.GOOGLE_SHEET_ID) throw new Error('GOOGLE_SHEET_ID is not configured.');
+
+    let keyJson;
+    try {
+      keyJson = JSON.parse(
+        rawKey.trimStart().startsWith('{')
+          ? rawKey
+          : Buffer.from(rawKey, 'base64').toString('utf8')
+      );
+    } catch (e) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY is not valid JSON or base64 JSON.');
+    }
+
     const auth = new google.auth.GoogleAuth({
       credentials: keyJson,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
+
     const sheets = google.sheets({ version: 'v4', auth });
 
-    // Build a summary of items for the sheet
+    // J is permanently reserved for the authenticated Clerk user ID.
+    // Make sure J1 contains exactly: clerkUserId
+    const headerResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: 'Sheet1!J1',
+    });
+
+    const currentHeader = String(headerResponse.data.values?.[0]?.[0] || '').trim();
+
+    if (currentHeader !== 'clerkUserId') {
+      throw new Error(
+        `Sheet1!J1 must contain "clerkUserId". Current value: "${currentHeader || '(empty)'}".`
+      );
+    }
+
     const itemsSummary = products
       .map(p => `${p.name} x${p.qty} (¥${(p.price * p.qty).toLocaleString()})`)
       .join(' | ');
 
-    // Keep the existing A:I order columns unchanged and store the Clerk user ID
-    // in the first available column from J onward. This avoids changing any
-    // existing order fields.
-    const headerResponse = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Sheet1!A:Z',
-    });
-
-    const headerRow = headerResponse.data.values?.[0] || [];
-    const normalizedHeaders = headerRow.map(h => String(h || '').trim().toLowerCase());
-
-    let clerkUserIdCol = -1;
-    for (let i = 9; i < normalizedHeaders.length; i++) {
-      if (['clerkuserid', 'clerk user id', 'clerk_user_id'].includes(normalizedHeaders[i])) {
-        clerkUserIdCol = i;
-        break;
-      }
-    }
-
-    if (clerkUserIdCol === -1) {
-      // Prefer J (index 9). If J already has another header, use the first
-      // empty column after J.
-      clerkUserIdCol = 9;
-      while (clerkUserIdCol < normalizedHeaders.length && normalizedHeaders[clerkUserIdCol]) {
-        clerkUserIdCol++;
-      }
-
-      const columnLetter = (() => {
-        let n = clerkUserIdCol + 1;
-        let s = '';
-        while (n > 0) {
-          const rem = (n - 1) % 26;
-          s = String.fromCharCode(65 + rem) + s;
-          n = Math.floor((n - 1) / 26);
-        }
-        return s;
-      })();
-
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: `Sheet1!${columnLetter}1`,
-        valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [['clerkUserId']] },
-      });
-    }
-
+    // A:I = existing order fields, J = Clerk user ID.
     const row = [
       orderRef,
       submittedAt || new Date().toISOString(),
@@ -148,31 +132,23 @@ export default async function handler(req, res) {
       itemsSummary,
       `¥${Number(total).toLocaleString()}`,
       'New',
+      clerkUserId,
     ];
-
-    while (row.length < clerkUserIdCol) row.push('');
-    row[clerkUserIdCol] = clerkUserId;
-
-    const endCol = (() => {
-      let n = row.length;
-      let s = '';
-      while (n > 0) {
-        const rem = (n - 1) % 26;
-        s = String.fromCharCode(65 + rem) + s;
-        n = Math.floor((n - 1) / 26);
-      }
-      return s;
-    })();
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Sheet1!A:${endCol}`,
+      range: 'Sheet1!A:J',
       valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
       requestBody: { values: [row] },
     });
+
   } catch (err) {
     console.error('Google Sheets error:', err);
-    return res.status(500).json({ error: 'Failed to save order', detail: err.message });
+    return res.status(500).json({
+      error: 'Failed to save order',
+      detail: err.message,
+    });
   }
 
   // ── 2. Send emails via Resend ─────────────────────────────────────────────
