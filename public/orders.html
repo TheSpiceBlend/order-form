@@ -1,93 +1,115 @@
-// api/my-orders.js
-// Returns the logged-in customer's orders from Google Sheets.
-// Requires: CLERK_SECRET_KEY, GOOGLE_SHEET_ID, GOOGLE_SERVICE_ACCOUNT_KEY
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders – The SpiceBlend</title>
+  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fdf8f2; color: #333; min-height: 100vh; }
+    header { background: #5c2d0e; color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+    header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+    .nav-links a { color: #ffd98a; text-decoration: none; margin-left: 20px; font-size: 0.9rem; }
+    main { max-width: 900px; margin: 40px auto; padding: 0 16px; }
+    h2 { font-size: 1.5rem; color: #5c2d0e; margin-bottom: 24px; }
+    .loading { text-align: center; padding: 40px; color: #888; }
+    .order-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; padding: 20px 24px; }
+    .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .order-title { font-weight: 700; font-size: 1.05rem; color: #5c2d0e; }
+    .order-date { font-size: 0.85rem; color: #999; }
+    .order-items { font-size: 0.95rem; line-height: 1.6; color: #444; margin-bottom: 10px; }
+    .order-total { font-weight: 700; color: #2d6e2d; font-size: 1rem; }
+    .order-status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: #e8f5e9; color: #2d6e2d; }
+    .no-orders { text-align: center; padding: 60px 20px; color: #888; }
+    .no-orders a { color: #5c2d0e; text-decoration: underline; }
+    #clerk-sign-in { max-width: 400px; margin: 60px auto; }
+    .sign-out-btn { background: none; border: 1px solid #ffd98a; color: #ffd98a; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .sign-out-btn:hover { background: rgba(255,217,138,0.15); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌶 The SpiceBlend</h1>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <button class="sign-out-btn" id="sign-out-btn" style="display:none">Sign Out</button>
+    </div>
+  </header>
 
-const { google } = require('googleapis');
+  <main>
+    <div id="clerk-sign-in"></div>
+    <div id="orders-section" style="display:none">
+      <h2>My Orders</h2>
+      <div id="orders-container"><div class="loading">Loading your orders…</div></div>
+    </div>
+  </main>
 
-async function getClerkEmail(authHeader) {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-  try {
-    // Decode the JWT payload (middle segment) without verifying signature.
-    // We then use the sub (userId) to fetch the user from Clerk's API,
-    // which implicitly confirms the token is valid (issued by our instance).
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    // base64url → base64: replace URL-safe chars and pad to multiple of 4
-    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(parts[1].length / 4) * 4, '=');
-    const payload = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
-    const userId = payload.sub;
-    if (!userId) return null;
+  <script>
+    const PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuY2xhcmtzdGFnZS5jb20k';
 
-    // Fetch the user record from Clerk using the userId
-    const res = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-      },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.email_addresses?.[0]?.email_address || null;
-  } catch {
-    return null;
-  }
-}
+    async function initClerk() {
+      const clerk = window.Clerk;
+      await clerk.load({ publishableKey: PUBLISHABLE_KEY });
 
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+      if (!clerk.user) {
+        clerk.mountSignIn(document.getElementById('clerk-sign-in'));
+        clerk.addListener(({ user }) => {
+          if (user) loadOrders();
+        });
+        return;
+      }
+      loadOrders();
+    }
 
-  // Verify Clerk session
-  const email = await getClerkEmail(req.headers['authorization']);
-  if (!email) return res.status(401).json({ error: 'Not authenticated' });
+    async function loadOrders() {
+      document.getElementById('clerk-sign-in').style.display = 'none';
+      document.getElementById('orders-section').style.display = 'block';
+      document.getElementById('sign-out-btn').style.display = 'inline-block';
 
-  try {
-    // Parse Google service account key
-    // GOOGLE_SERVICE_ACCOUNT_KEY may be stored as raw JSON or base64 — handle both
-    const rawKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY || '';
-    const keyJson = JSON.parse(
-      rawKey.trimStart().startsWith('{') ? rawKey : Buffer.from(rawKey, 'base64').toString('utf8')
-    );
-    const auth = new google.auth.GoogleAuth({
-      credentials: keyJson,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    });
-    const sheets = google.sheets({ version: 'v4', auth });
+      document.getElementById('sign-out-btn').addEventListener('click', () => {
+        window.Clerk.signOut().then(() => location.reload());
+      });
 
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Sheet1!A:Z', // grab all columns
-    });
+      try {
+        const token = await window.Clerk.session.getToken();
+        const res = await fetch('/api/my-orders', {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
 
-    const rows = response.data.values || [];
-    if (rows.length < 2) return res.status(200).json({ orders: [] });
+        const container = document.getElementById('orders-container');
+        if (!data.orders || data.orders.length === 0) {
+          container.innerHTML = '<div class="no-orders"><p>No orders found.</p><p style="margin-top:12px"><a href="/">Place your first order</a></p></div>';
+          return;
+        }
 
-    // First row = headers
-    const headers = rows[0].map(h => h.toLowerCase().trim());
+        container.innerHTML = data.orders.map(order => {
+          const date = order['timestamp'] || order['date'] || order['order date'] || '';
+          const items = order['items'] || order['order'] || order['products'] || '';
+          const total = order['total'] || order['amount'] || order['price'] || '';
+          const status = order['status'] || 'Received';
+          const id = order['order id'] || order['orderid'] || order['id'] || '';
 
-    // Find the email column (look for "email" in headers)
-    const emailCol = headers.findIndex(h => h.includes('email'));
-    if (emailCol === -1) return res.status(200).json({ orders: [], note: 'No email column found in sheet' });
+          return `<div class="order-card">
+            <div class="order-header">
+              <div class="order-title">${id ? 'Order #' + id : 'Order'}</div>
+              <div class="order-date">${date}</div>
+            </div>
+            <div class="order-items">${items}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              ${total ? '<div class="order-total">Total: ₹' + total + '</div>' : ''}
+              <span class="order-status">${status}</span>
+            </div>
+          </div>`;
+        }).join('');
+      } catch (err) {
+        document.getElementById('orders-container').innerHTML = '<div class="loading">Error loading orders. Please try again.</div>';
+        console.error(err);
+      }
+    }
 
-    // Filter rows for this customer
-    const customerRows = rows.slice(1).filter(row => {
-      const rowEmail = (row[emailCol] || '').trim().toLowerCase();
-      return rowEmail === email.toLowerCase();
-    });
-
-    // Build order objects from headers
-    const orders = customerRows.map(row => {
-      const obj = {};
-      headers.forEach((h, i) => { obj[h] = row[i] || ''; });
-      return obj;
-    }).reverse(); // newest first
-
-    res.status(200).json({ orders, email });
-  } catch (err) {
-    console.error('my-orders error:', err);
-    res.status(500).json({ error: 'Failed to fetch orders', detail: err.message });
-  }
-};
+    window.addEventListener('load', initClerk);
+  </script>
+</body>
+</html>
