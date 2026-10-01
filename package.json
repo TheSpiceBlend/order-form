@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Order form with email notifications and Google Sheets logging",
   "dependencies": {
+    "@clerk/backend": "^1.0.0",
     "resend": "^3.0.0",
     "googleapis": "^140.0.0"
   }
