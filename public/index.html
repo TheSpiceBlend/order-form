@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Spice Blend — Saturday Lunch Order</title>
+<title>The Spice Blend â Saturday Lunch Order</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<!-- Clerk auth — same key as login.html -->
+<!-- Clerk auth â same key as login.html -->
 <script async crossorigin="anonymous"
   src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
   data-clerk-publishable-key="pk_live_Y2xlcmsudGhlc3BpY2VibGVuZC5jb20k">
@@ -60,7 +60,7 @@
     overflow-x: hidden;
   }
 
-  /* ── Decorative background ── */
+  /* ââ Decorative background ââ */
   body::before {
     content: '';
     position: fixed;
@@ -83,7 +83,7 @@
   .leaf-2 { bottom: 10%; right: -80px; width: 280px; transform: rotate(20deg) scaleX(-1); }
   .leaf-3 { top: 40%; left: -40px; width: 180px; transform: rotate(60deg); }
 
-  /* ── Hero header ── */
+  /* ââ Hero header ââ */
   .hero {
     position: relative;
     z-index: 1;
@@ -169,7 +169,7 @@
   }
   #userBar button:hover { background: rgba(255,255,255,0.13); color: white; }
 
-  /* ── Form card ── */
+  /* ââ Form card ââ */
   .form-wrap {
     position: relative;
     z-index: 1;
@@ -255,7 +255,7 @@
     gap: 12px;
   }
 
-  /* ── Products ── */
+  /* ââ Products ââ */
   .products-grid { display: flex; flex-direction: column; gap: 12px; }
 
   .product-item {
@@ -405,7 +405,7 @@
   .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .qty-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
-  /* ── Mobile fix ── */
+  /* ââ Mobile fix ââ */
   @media (max-width: 420px) {
     .product-item {
       flex-wrap: wrap;
@@ -433,7 +433,7 @@
     .product-name { font-size: 15px; }
   }
 
-  /* ── Summary ── */
+  /* ââ Summary ââ */
   .summary-rows { display: flex; flex-direction: column; gap: 8px; }
 
   .summary-row {
@@ -454,7 +454,7 @@
 
   .empty-cart { font-size: 13px; color: var(--ink-faint); font-style: italic; }
 
-  /* ── Submit ── */
+  /* ââ Submit ââ */
   .submit-btn {
     width: 100%;
     padding: 15px;
@@ -482,7 +482,7 @@
     line-height: 1.5;
   }
 
-  /* ── Success ── */
+  /* ââ Success ââ */
   .success-state {
     display: none;
     flex-direction: column;
@@ -528,7 +528,7 @@
   }
   .order-ref strong { color: var(--ink); font-family: monospace; font-size: 14px; }
 
-  /* ── Error ── */
+  /* ââ Error ââ */
   .error-msg {
     display: none;
     padding: 10px 14px;
@@ -540,7 +540,7 @@
     margin-bottom: 1rem;
   }
 
-  /* ── Footer ── */
+  /* ââ Footer ââ */
   .footer {
     position: relative;
     z-index: 1;
@@ -590,7 +590,7 @@
   }
   .new-order-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,90,61,0.4); }
 
-  /* ── Sold out ── */
+  /* ââ Sold out ââ */
   .product-item.sold-out {
     opacity: 0.55;
     cursor: not-allowed;
@@ -626,8 +626,8 @@
 <!-- Auth gate: shown while Clerk loads, hidden once user confirmed -->
 <div id="authGate">
   <div class="gate-inner">
-    <div class="gate-logo">🌿</div>
-    <div>Loading…</div>
+    <div class="gate-logo">ð¿</div>
+    <div>Loadingâ¦</div>
   </div>
 </div>
 
@@ -646,15 +646,15 @@
 
 <!-- Hero -->
 <div class="hero">
-  <div class="hero-badge">🌿 The Spice Blend</div>
+  <div class="hero-badge">ð¿ The Spice Blend</div>
   <h1>Place your <span>Saturday Lunch Order</span></h1>
-  <p class="hero-sub">Authentic Kerala home cooking — delivered fresh to your door.</p>
-  <div class="hero-divider">🍃</div>
+  <p class="hero-sub">Authentic Kerala home cooking â delivered fresh to your door.</p>
+  <div class="hero-divider">ð</div>
 </div>
 
 <!-- Signed-in user bar -->
 <div id="userBar" style="display:none">
-  <a href="/orders" id="ordersLink" style="display:inline-block;padding:7px 16px;border-radius:20px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;">🧾 My Orders</a>
+  <a href="/orders" id="ordersLink" style="display:inline-block;padding:7px 16px;border-radius:20px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;text-decoration:none;transition:background 0.2s;">ð§¾ My Orders</a>
   <button onclick="signOut()">Sign out</button>
 </div>
 
@@ -707,10 +707,10 @@
   <div class="section">
     <div class="field">
       <label for="notes">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <textarea id="notes" placeholder="Delivery instructions, allergies, special requests…"></textarea>
+      <textarea id="notes" placeholder="Delivery instructions, allergies, special requestsâ¦"></textarea>
     </div>
     <div class="error-msg" id="errorMsg"></div>
-    <button class="submit-btn" id="submitBtn" onclick="submitOrder()">🛒 Place Order</button>
+    <button class="submit-btn" id="submitBtn" onclick="submitOrder()">ð Place Order</button>
     <p class="form-note">You'll receive a confirmation email with your order details.</p>
   </div>
 
@@ -721,12 +721,12 @@
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
     </div>
-    <div class="success-title">Order received! 🎉</div>
+    <div class="success-title">Order received! ð</div>
     <p class="success-sub">Thank you for your order!</p>
     <div class="order-ref">Order reference: <strong id="orderRef"></strong></div>
 
     <div class="success-info-box email-box">
-      <div class="info-box-icon">📧</div>
+      <div class="info-box-icon">ð§</div>
       <div class="info-box-text">
         <strong>Confirmation email sent</strong>
         A confirmation with your full order details has been sent to your email address.
@@ -734,39 +734,39 @@
     </div>
 
     <div class="success-info-box payment-box">
-      <div class="info-box-icon">💳</div>
+      <div class="info-box-icon">ð³</div>
       <div class="info-box-text">
         <strong>Payment link included</strong>
         Your email also contains a PayPay payment link for the exact order amount. Please complete payment to confirm your order.
       </div>
     </div>
 
-    <button class="new-order-btn" onclick="resetForm()">🛒 Place Another Order</button>
+    <button class="new-order-btn" onclick="resetForm()">ð Place Another Order</button>
   </div>
 
 </div>
 </div>
 
-<div class="footer">© The Spice Blend · Authentic Kerala Cuisine</div>
+<div class="footer">Â© The Spice Blend Â· Authentic Kerala Cuisine</div>
 
 <script>
-// ─── Clerk auth gate ─────────────────────────────────────────────────────────
+// âââ Clerk auth gate âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 window.addEventListener('load', async () => {
   try {
     await window.Clerk.load();
   } catch(e) {
-    // Clerk failed to load — send to login
+    // Clerk failed to load â send to login
     window.location.href = '/login';
     return;
   }
 
   if (!window.Clerk.user) {
-    // Not signed in — redirect to login
+    // Not signed in â redirect to login
     window.location.href = '/login';
     return;
   }
 
-  // Signed in — reveal the page
+  // Signed in â reveal the page
   const gate = document.getElementById('authGate');
   gate.style.transition = 'opacity 0.3s ease';
   gate.style.opacity = '0';
@@ -793,7 +793,7 @@ async function signOut() {
   window.location.href = '/login';
 }
 
-// ─── Products ────────────────────────────────────────────────────────────────
+// âââ Products ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const PRODUCTS = [
   {
     id: 'p1',
@@ -806,7 +806,7 @@ const PRODUCTS = [
   {
     id: 'p2',
     name: 'Kerala Chicken Fry',
-    desc: 'Crispy fried chicken marinated in a bold Kerala spice blend — golden, fiery, and full of flavour',
+    desc: 'Crispy fried chicken marinated in a bold Kerala spice blend â golden, fiery, and full of flavour',
     price: 1200,
     img: 'https://github.com/TheSpiceBlend/order-form/blob/main/Chicken_Fry.webp?raw=true',
     soldOut: false
@@ -822,7 +822,7 @@ PRODUCTS.forEach(p => {
     <div class="product-check" id="check-${p.id}"></div>
     ${p.img
       ? `<img class="product-img" src="${p.img}" alt="${p.name}" ${p.soldOut ? 'style="filter:grayscale(60%)"' : ''}>`
-      : `<div class="product-img-placeholder">🍖</div>`
+      : `<div class="product-img-placeholder">ð</div>`
     }
     <div class="product-info">
       <div class="product-name">${p.name}</div>
@@ -830,9 +830,9 @@ PRODUCTS.forEach(p => {
       ${p.soldOut ? '<span class="sold-out-badge">Sold Out</span>' : ''}
     </div>
     <div class="product-right">
-      <div class="product-price">¥${p.price.toLocaleString()}</div>
+      <div class="product-price">Â¥${p.price.toLocaleString()}</div>
       ${!p.soldOut ? `<div class="qty-wrapper" id="qty-${p.id}">
-        <button class="qty-btn" onclick="changeQty('${p.id}',-1,event)">−</button>
+        <button class="qty-btn" onclick="changeQty('${p.id}',-1,event)">â</button>
         <input class="qty-input" type="number" min="1" max="99" value="1"
                id="qtyVal-${p.id}" oninput="updateSummary()" onclick="event.stopPropagation()">
         <button class="qty-btn" onclick="changeQty('${p.id}',1,event)">+</button>
@@ -869,12 +869,12 @@ function updateSummary() {
   el.innerHTML = `<div class="summary-rows">
     ${selected.map(p => `
       <div class="summary-row">
-        <span>${p.name} × ${p.qty}</span>
-        <span>¥${(p.price * p.qty).toLocaleString()}</span>
+        <span>${p.name} Ã ${p.qty}</span>
+        <span>Â¥${(p.price * p.qty).toLocaleString()}</span>
       </div>`).join('')}
     <div class="summary-row total">
       <span>Total</span>
-      <span>¥${total.toLocaleString()}</span>
+      <span>Â¥${total.toLocaleString()}</span>
     </div>
   </div>`;
 }
@@ -906,27 +906,19 @@ async function submitOrder() {
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = 'Sending…';
+  btn.textContent = 'Sendingâ¦';
 
   try {
-    // Send the signed-in Clerk session token with the order.
-    // The server verifies it and records the authenticated Clerk user ID.
-    await window.Clerk.load();
-    if (!window.Clerk.user || !window.Clerk.session) {
-      throw new Error('Your login session has expired. Please sign in again.');
-    }
-
-    const token = await window.Clerk.session.getToken();
-    if (!token) {
-      throw new Error('Unable to authenticate your session. Please sign in again.');
-    }
+    // Get Clerk session token for authenticated API call
+    let authHeader = {};
+    try {
+      const token = await window.Clerk?.session?.getToken();
+      if (token) authHeader = { 'Authorization': `Bearer ${token}` };
+    } catch (_) {}
 
     const res = await fetch('/api/order', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Content-Type': 'application/json', ...authHeader },
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
@@ -940,7 +932,7 @@ async function submitOrder() {
     document.getElementById('successState').style.display = 'flex';
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = '🛒 Place Order';
+    btn.textContent = 'ð Place Order';
     showError(err.message || 'Something went wrong. Please try again.');
   }
 }
@@ -966,11 +958,11 @@ function resetForm() {
   updateSummary();
   const btn = document.getElementById('submitBtn');
   btn.disabled = false;
-  btn.textContent = '🛒 Place Order';
+  btn.textContent = 'ð Place Order';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ─── Autofill customer details ───────────────────────────────────────────────
+// âââ Autofill customer details âââââââââââââââââââââââââââââââââââââââââââââââ
 function loadSavedCustomer(clerkEmail, clerkFirst, clerkLast) {
   try {
     const saved = localStorage.getItem('spiceblend_customer');
