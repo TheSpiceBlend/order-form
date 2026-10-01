@@ -163,7 +163,27 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Poppins',sans-seri
       <div class="form-footer">No account yet? <span onclick="switchTab('signup')">Create one →</span> &nbsp;|&nbsp; <span onclick="openModal()">Request access</span></div>
     </div>
 
-    <!-- Sign Up Form -->
+    
+    <!-- 2FA TOTP Form -->
+    <div id="formTotp" style="display:none">
+      <div style="text-align:center;margin-bottom:0.8rem;">
+        <div style="font-size:1.5rem;">🔐</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:3px;">Two-Factor Authentication</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.45);">Enter the 6-digit code from your authenticator app</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Authenticator Code</label>
+        <div class="field-wrap">
+          <span class="field-icon">🔢</span>
+          <input class="form-input" type="text" id="totpCode" placeholder="000000" autocomplete="one-time-code" maxlength="6" inputmode="numeric" style="letter-spacing:0.3em;text-align:center;font-size:18px;">
+        </div>
+      </div>
+      <div class="msg-error" id="totpError"></div>
+      <button class="submit-btn" id="totpBtn" onclick="handleTotp()">✅ Verify Code · 確認</button>
+      <div class="form-footer"><span onclick="cancelTotp()">← Back to Sign In</span></div>
+    </div>
+
+<!-- Sign Up Form -->
     <div id="formSignUp" style="display:none">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.65rem;">
         <div>
@@ -318,9 +338,11 @@ async function handleSignIn() {
       launchConfetti();
       setTimeout(() => window.location.href = '/', 1200);
     } else if (result.status === 'needs_second_factor') {
-      errEl.textContent = '🔐 Two-factor authentication is required. Please disable MFA in your account or contact the administrator.';
-      errEl.style.display = 'block';
-      btn.disabled = false; btn.textContent = '🍛 Sign In · ログイン';
+        window._pendingSignIn = result;
+        document.getElementById('formSignIn').style.display = 'none';
+        document.getElementById('formTotp').style.display = 'block';
+        document.getElementById('totpCode').focus();
+        btn.disabled = false; btn.textContent = '🍛 Sign In · ログイン';
     } else {
       errEl.textContent = 'Sign in incomplete (status: ' + result.status + '). Please try again.';
       errEl.style.display = 'block';
@@ -491,8 +513,52 @@ for (let i = 0; i < 22; i++) {
 }
 
 // ── Enter key ─────────────────────────────────────────────────────────────
+async function handleTotp() {
+  const code  = document.getElementById('totpCode').value.trim();
+  const errEl = document.getElementById('totpError');
+  const btn   = document.getElementById('totpBtn');
+  errEl.style.display = 'none';
+  if (!code || code.length < 6) {
+    errEl.textContent = 'Please enter the 6-digit code from your authenticator app.';
+    errEl.style.display = 'block'; return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Verifying...';
+  try {
+    const clerk = await waitForClerk();
+    const signIn = window._pendingSignIn || clerk.client.signIn;
+    const result = await signIn.attemptSecondFactor({ strategy: 'totp', code });
+    if (result.status === 'complete') {
+      await clerk.setActive({ session: result.createdSessionId });
+      document.getElementById('formTotp').style.display = 'none';
+      const succEl = document.getElementById('siSuccess');
+      succEl.textContent = '🌸 Welcome back! Redirecting...';
+      succEl.style.display = 'block';
+      document.getElementById('formSignIn').style.display = 'block';
+      launchConfetti();
+      setTimeout(() => window.location.href = '/', 1200);
+    } else {
+      errEl.textContent = 'Verification incomplete (status: ' + result.status + '). Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '✅ Verify Code · 確認';
+    }
+  } catch (err) {
+    const msg = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Invalid code. Please try again.';
+    errEl.textContent = '❌ ' + msg;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '✅ Verify Code · 確認';
+  }
+}
+function cancelTotp() {
+  window._pendingSignIn = null;
+  document.getElementById('formTotp').style.display = 'none';
+  document.getElementById('formSignIn').style.display = 'block';
+  document.getElementById('totpCode').value = '';
+  document.getElementById('totpError').style.display = 'none';
+}
+
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
+  if (document.getElementById('formTotp').style.display !== 'none') { handleTotp(); return; }
   if (document.getElementById('formSignIn').style.display !== 'none') { handleSignIn(); return; }
   if (document.getElementById('verifyCode')) { handleVerify(); return; }
   handleSignUp();
