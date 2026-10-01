@@ -909,9 +909,24 @@ async function submitOrder() {
   btn.textContent = 'Sending…';
 
   try {
+    // Send the signed-in Clerk session token with the order.
+    // The server verifies it and records the authenticated Clerk user ID.
+    await window.Clerk.load();
+    if (!window.Clerk.user || !window.Clerk.session) {
+      throw new Error('Your login session has expired. Please sign in again.');
+    }
+
+    const token = await window.Clerk.session.getToken();
+    if (!token) {
+      throw new Error('Unable to authenticate your session. Please sign in again.');
+    }
+
     const res = await fetch('/api/order', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
