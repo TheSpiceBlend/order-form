@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Orders – The SpiceBlend</title>
-  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #fdf8f2; color: #333; min-height: 100vh; }
@@ -36,7 +35,6 @@
       <button class="sign-out-btn" id="sign-out-btn" style="display:none">Sign Out</button>
     </div>
   </header>
-
   <main>
     <div id="clerk-sign-in"></div>
     <div id="orders-section" style="display:none">
@@ -44,53 +42,34 @@
       <div id="orders-container"><div class="loading">Loading your orders…</div></div>
     </div>
   </main>
-
   <script>
     const PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuY2xhcmtzdGFnZS5jb20k';
-
-    async function initClerk() {
-      const clerk = window.Clerk;
-      await clerk.load({ publishableKey: PUBLISHABLE_KEY });
-
-      if (!clerk.user) {
-        clerk.mountSignIn(document.getElementById('clerk-sign-in'));
-        clerk.addListener(({ user }) => {
-          if (user) loadOrders();
-        });
-        return;
-      }
-      loadOrders();
-    }
 
     async function loadOrders() {
       document.getElementById('clerk-sign-in').style.display = 'none';
       document.getElementById('orders-section').style.display = 'block';
-      document.getElementById('sign-out-btn').style.display = 'inline-block';
-
-      document.getElementById('sign-out-btn').addEventListener('click', () => {
+      const signOutBtn = document.getElementById('sign-out-btn');
+      signOutBtn.style.display = 'inline-block';
+      signOutBtn.addEventListener('click', () => {
         window.Clerk.signOut().then(() => location.reload());
       });
-
       try {
         const token = await window.Clerk.session.getToken();
         const res = await fetch('/api/my-orders', {
           headers: { Authorization: 'Bearer ' + token }
         });
         const data = await res.json();
-
         const container = document.getElementById('orders-container');
         if (!data.orders || data.orders.length === 0) {
           container.innerHTML = '<div class="no-orders"><p>No orders found.</p><p style="margin-top:12px"><a href="/">Place your first order</a></p></div>';
           return;
         }
-
         container.innerHTML = data.orders.map(order => {
           const date = order['timestamp'] || order['date'] || order['order date'] || '';
           const items = order['items'] || order['order'] || order['products'] || '';
           const total = order['total'] || order['amount'] || order['price'] || '';
           const status = order['status'] || 'Received';
           const id = order['order id'] || order['orderid'] || order['id'] || '';
-
           return `<div class="order-card">
             <div class="order-header">
               <div class="order-title">${id ? 'Order #' + id : 'Order'}</div>
@@ -109,7 +88,28 @@
       }
     }
 
-    window.addEventListener('load', initClerk);
+    function initClerk() {
+      const clerk = window.Clerk;
+      clerk.load({ publishableKey: PUBLISHABLE_KEY }).then(() => {
+        if (!clerk.user) {
+          clerk.mountSignIn(document.getElementById('clerk-sign-in'));
+          clerk.addListener(({ user }) => {
+            if (user) loadOrders();
+          });
+        } else {
+          loadOrders();
+        }
+      });
+    }
+
+    // Wait for Clerk script to fully load
+    window.addEventListener('load', () => {
+      if (window.Clerk) {
+        initClerk();
+      } else {
+        window.addEventListener('clerk:loaded', initClerk);
+      }
+    });
   </script>
 </body>
 </html>
