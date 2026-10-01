@@ -526,7 +526,9 @@ async function handleTotp() {
   try {
     const clerk = await waitForClerk();
     const signIn = window._pendingSignIn || clerk.client.signIn;
-    const result = await signIn.attemptSecondFactor({ strategy: 'totp', code });
+    const supported = signIn.supportedSecondFactors || [];
+    const strategy = supported.length > 0 ? supported[0].strategy : 'totp';
+    const result = await signIn.attemptSecondFactor({ strategy, code });
     if (result.status === 'complete') {
       await clerk.setActive({ session: result.createdSessionId });
       document.getElementById('formTotp').style.display = 'none';
