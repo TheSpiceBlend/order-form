@@ -7,7 +7,7 @@
       <script
     async
     crossorigin="anonymous"
-    data-clerk-publishable-key="pk_live_Y2xlcmsudGhlc3BpY2VibGVuZC5jb20k"
+    data-clerk-publishable-key="pk_live_Y2xlcmsuZGhlbGMzBpY2VibGVuZC5jb20k"
     src="https://clerk.thespiceblend.com/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
     type="text/javascript">
   </script>
@@ -50,7 +50,7 @@
     </div>
   </main>
   <script>
-    const PUBLISHABLE_KEY = 'pk_live_Y2xlcmsudGhlc3BpY2VibGVuZC5jb20k';
+    const PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZGhlbGMzBpY2VibGVuZC5jb20k';
 
     async function loadOrders() {
       document.getElementById('clerk-sign-in').style.display = 'none';
@@ -84,7 +84,7 @@
             </div>
             <div class="order-items">${items}</div>
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-              ${total ? '<div class="order-total">Total: ₹' + total + '</div>' : ''}
+              ${total ? '<div class="order-total">Total: ¥' + total + '</div>' : ''}
               <span class="order-status">${status}</span>
             </div>
           </div>`;
