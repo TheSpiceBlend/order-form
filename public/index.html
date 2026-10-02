@@ -663,7 +663,7 @@
 <div class="form-card" id="formCard">
 
   <!-- Contact -->
-  <div class="section">
+  <div class="section" id="detailsSection" style="display:none">
     <div class="section-label">Your details</div>
     <div class="field-row field">
       <div>
@@ -786,6 +786,18 @@ window.addEventListener('load', async () => {
   const clerkLast  = window.Clerk.user.lastName  || '';
 
   loadSavedCustomer(clerkEmail, clerkFirst, clerkLast);
+
+  // Hide details form — logged-in user, details already known
+  const detailsSec = document.getElementById('detailsSection');
+  if (detailsSec) detailsSec.style.display = 'none';
+
+  // Show "Ordering as" banner
+  const banner = document.getElementById('orderingAsBanner');
+  const nameEl = document.getElementById('orderingAsName');
+  if (banner && nameEl) {
+    nameEl.textContent = (clerkFirst + ' ' + clerkLast).trim() || clerkEmail;
+    banner.style.display = 'block';
+  }
 });
 
 async function signOut() {
@@ -1004,3 +1016,9 @@ function forgetMe() {
 </script>
 </body>
 </html>
+
+
+  <!-- Logged-in user banner -->
+  <div id="orderingAsBanner" style="display:none;padding:10px 14px;background:#f9f5f0;border-radius:8px;font-size:14px;color:#5c2d0e;margin-bottom:4px">
+    🌸 Ordering as <strong id="orderingAsName"></strong> — <a href="/orders.html" style="color:#5c2d0e;text-decoration:underline">My Orders</a>
+  </div>
