@@ -81,7 +81,7 @@
           const date = order['timestamp'] || order['date'] || order['order date'] || '';
           const items = order['items'] || order['order'] || order['products'] || '';
           const total = order['total'] || order['amount'] || order['price'] || '';
-          const status = order['status'] || 'Received';
+          const status = order['status'] || 'Order Confirmed';
           const id = order['order id'] || order['orderid'] || order['id'] || '';
           const paymentStatus = (order['payment status'] || order['payment'] || order['paid'] || '').toLowerCase().trim();
           return `<div class="order-card">
@@ -93,15 +93,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
               ${total ? '<div class="order-total">Total: ¥' + total + '</div>' : ''}
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                <span class="order-status ${
-  status.toLowerCase().includes('confirmed') ? 'status-confirmed' :
-  status.toLowerCase().includes('complete') ? 'status-complete' :
-  'status-received'
-}">${
-  status.toLowerCase().includes('confirmed') ? '🟢 Order Confirmed' :
-  status.toLowerCase().includes('complete') ? '✅ Order Complete' :
-  '🟡 ' + (status || 'Received')
-}</span>
+                <span class="order-status ${status.toLowerCase().includes('complete') ? 'status-complete' : 'status-confirmed'}">${status.toLowerCase().includes('complete') ? '✅ Order Complete' : '🟢 Order Confirmed'}</span>
                 <span class="payment-badge ${paymentStatus === 'paid' ? 'paid' : 'pending'}">${paymentStatus === 'paid' ? '✅ Paid' : '⏳ Payment Pending'}</span>
               </div>
             </div>
