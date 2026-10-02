@@ -95,27 +95,38 @@
       }
     }
 
-    function initClerk() {
-      const clerk = window.Clerk;
-      clerk.load().then(() => {
-        if (!clerk.user) {
-          clerk.mountSignIn(document.getElementById('clerk-sign-in'));
-          clerk.addListener(({ user }) => {
-            if (user) loadOrders();
-          });
-        } else {
-          loadOrders();
-        }
+    // Same robust waitForClerk pattern as login.html
+    let _clerkLoadPromise = null;
+    function waitForClerk() {
+      if (_clerkLoadPromise) return _clerkLoadPromise;
+      _clerkLoadPromise = new Promise((resolve, reject) => {
+        let elapsed = 0;
+        const interval = setInterval(async () => {
+          elapsed += 50;
+          if (window.Clerk) {
+            clearInterval(interval);
+            try { await window.Clerk.load(); resolve(window.Clerk); }
+            catch(e) { reject(e); }
+          } else if (elapsed > 10000) {
+            clearInterval(interval);
+            reject(new Error('Clerk failed to load'));
+          }
+        }, 50);
       });
+      return _clerkLoadPromise;
     }
 
-    // Wait for Clerk script to fully load
-    window.addEventListener('load', () => {
-      if (window.Clerk) {
-        initClerk();
+    waitForClerk().then(clerk => {
+      if (!clerk.user) {
+        clerk.mountSignIn(document.getElementById('clerk-sign-in'));
+        clerk.addListener(({ user }) => { if (user) loadOrders(); });
       } else {
-        window.addEventListener('clerk:loaded', initClerk);
+        loadOrders();
       }
+    }).catch(err => {
+      document.getElementById('orders-container').innerHTML =
+        '<div class="loading">Auth service failed to load. Please refresh.</div>';
+      console.error(err);
     });
   </script>
 </body>
