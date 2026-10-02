@@ -61,7 +61,7 @@
       const signOutBtn = document.getElementById('sign-out-btn');
       signOutBtn.style.display = 'inline-block';
       signOutBtn.addEventListener('click', () => {
-        window.Clerk.signOut().then(() => location.reload());
+        window.Clerk.signOut().then(() => window.location.href = '/login.html');
       });
       try {
         const token = await window.Clerk.session.getToken();
@@ -91,7 +91,7 @@
               ${total ? '<div class="order-total">Total: ¥' + total + '</div>' : ''}
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                 <span class="order-status">${status}</span>
-                <span class="payment-badge ${paymentStatus === 'paid' ? 'paid' : 'pending'}">${paymentStatus === 'paid' ? '✅ Paid' : '⏳ Pending'}</span>
+                <span class="payment-badge ${paymentStatus === 'paid' ? 'paid' : 'pending'}">${paymentStatus === 'paid' ? '✅ Paid' : '⏳ Payment Pending'}</span>
               </div>
             </div>
           </div>`;
