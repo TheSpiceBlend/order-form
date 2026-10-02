@@ -102,15 +102,22 @@ export default async function handler(req, res) {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
-    // J is permanently reserved for the authenticated Clerk user ID.
-    // Make sure J1 contains exactly: clerkUserId
-    const headerResponse = await sheets.spreadsheets.values.get({
+    // Ensure column headers are set: I1=Status, J1=clerkUserId
+    const headerCheck = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Sheet1!J1',
+      range: 'Sheet1!I1:J1',
     });
-
-    const currentHeader = String(headerResponse.data.values?.[0]?.[0] || '').trim();
-
+    const [col_I, col_J] = headerCheck.data.values?.[0] || [];
+    // Auto-set I1 to Status if empty
+    if (!col_I || col_I.trim() === '') {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: 'Sheet1!I1',
+        valueInputOption: 'USER_ENTERED',
+        requestBody: { values: [['Status']] },
+      });
+    }
+    const currentHeader = String(col_J || '').trim();
     if (currentHeader !== 'clerkUserId') {
       throw new Error(
         `Sheet1!J1 must contain "clerkUserId". Current value: "${currentHeader || '(empty)'}".`
@@ -131,7 +138,7 @@ export default async function handler(req, res) {
       notes || '',
       itemsSummary,
       `¥${Number(total).toLocaleString()}`,
-      'New',
+      'Received',
       clerkUserId,
     ];
 
