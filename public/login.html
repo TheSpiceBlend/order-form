@@ -260,7 +260,16 @@ function waitForClerk() {
 }
 
 // Start loading Clerk immediately
-waitForClerk().then(clerk => {
+waitForClerk().then(async clerk => {
+  // Handle Clerk redirect callbacks (email verification links, OAuth, etc.)
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('__clerk_ticket') || url.searchParams.has('__clerk_status') || url.searchParams.has('__clerk_redirect_count')) {
+    try {
+      await clerk.handleRedirectCallback();
+    } catch (e) {
+      console.warn('handleRedirectCallback error:', e);
+    }
+  }
   if (clerk.user) {
     window.location.href = '/';
   }
