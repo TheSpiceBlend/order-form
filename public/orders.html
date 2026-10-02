@@ -27,6 +27,9 @@
     .order-items { font-size: 0.95rem; line-height: 1.6; color: #444; margin-bottom: 10px; }
     .order-total { font-weight: 700; color: #2d6e2d; font-size: 1rem; }
     .order-status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; background: #e8f5e9; color: #2d6e2d; }
+    .order-status.status-received  { background:#fff8e1; color:#f57f17; border:1px solid #ffe082; }
+    .order-status.status-confirmed { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .order-status.status-complete  { background:#e3f2fd; color:#1565c0; border:1px solid #90caf9; }
     .payment-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
     .payment-badge.paid { background: #e8f5e9; color: #2d6e2d; }
     .payment-badge.pending { background: #fff3e0; color: #e65100; }
@@ -90,7 +93,15 @@
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
               ${total ? '<div class="order-total">Total: ¥' + total + '</div>' : ''}
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                <span class="order-status">${status}</span>
+                <span class="order-status ${
+  status.toLowerCase().includes('confirmed') ? 'status-confirmed' :
+  status.toLowerCase().includes('complete') ? 'status-complete' :
+  'status-received'
+}">${
+  status.toLowerCase().includes('confirmed') ? '🟢 Order Confirmed' :
+  status.toLowerCase().includes('complete') ? '✅ Order Complete' :
+  '🟡 ' + (status || 'Received')
+}</span>
                 <span class="payment-badge ${paymentStatus === 'paid' ? 'paid' : 'pending'}">${paymentStatus === 'paid' ? '✅ Paid' : '⏳ Payment Pending'}</span>
               </div>
             </div>
