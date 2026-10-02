@@ -787,6 +787,9 @@ window.addEventListener('load', async () => {
 
   loadSavedCustomer(clerkEmail, clerkFirst, clerkLast);
 
+  // Store Clerk user data globally so submitOrder() can use it
+  window.__clerkUser = { firstName: clerkFirst, lastName: clerkLast, email: clerkEmail, phone: '' };
+
   // Hide details form — logged-in user, details already known
   const detailsSec = document.getElementById('detailsSection');
   if (detailsSec) detailsSec.style.display = 'none';
@@ -892,10 +895,12 @@ function updateSummary() {
 }
 
 async function submitOrder() {
-  const firstName = document.getElementById('firstName').value.trim();
-  const lastName  = document.getElementById('lastName').value.trim();
-  const email     = document.getElementById('email').value.trim();
-  const phone     = document.getElementById('phone').value.trim();
+  // Use Clerk user data if logged in (details form is hidden)
+  const clerkUser = window.__clerkUser || {};
+  const firstName = clerkUser.firstName || document.getElementById('firstName').value.trim();
+  const lastName  = clerkUser.lastName  || document.getElementById('lastName').value.trim();
+  const email     = clerkUser.email     || document.getElementById('email').value.trim();
+  const phone     = clerkUser.phone     || document.getElementById('phone').value.trim();
   const notes     = document.getElementById('notes').value.trim();
   const selected  = getSelectedProducts();
   const errorMsg  = document.getElementById('errorMsg');
