@@ -434,14 +434,23 @@ async function handleSignUp() {
 
   try {
     const clerk = await waitForClerk();
-    _signUpAttempt = await clerk.client.signUp.create({
+    const signUp = await clerk.client.signUp.create({
       firstName, lastName,
       emailAddress: email,
       password,
     });
-    // Trigger email verification
-    await _signUpAttempt.prepareEmailAddressVerification({ strategy: 'email_code' });
-    showVerificationStep();
+    if (signUp.status === 'complete') {
+      await clerk.setActive({ session: signUp.createdSessionId });
+      document.getElementById('suSuccess').textContent = '🌸 Account created! Redirecting...';
+      document.getElementById('suSuccess').style.display = 'block';
+      launchConfetti();
+      setTimeout(() => window.location.href = '/', 1500);
+    } else {
+      // Email verification still required — fall back to OTP flow
+      _signUpAttempt = signUp;
+      await _signUpAttempt.prepareEmailAddressVerification({ strategy: 'email_code' });
+      showVerificationStep();
+    }
   } catch (err) {
     console.error('Sign up error:', err);
     // Show the most specific error message available, including raw error for debugging
