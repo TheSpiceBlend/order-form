@@ -619,6 +619,16 @@
     text-decoration: line-through;
     color: var(--ink-faint);
   }
+
+    /* SpiceBlend Specials */
+    .special-item { opacity: 0.82; cursor: default; }
+    .special-item:hover { transform: none; box-shadow: none; }
+    .special-options { display:flex; flex-wrap:wrap; gap:4px; margin-top:6px; }
+    .option-tag {
+      font-size:10px; padding:2px 7px; border-radius:20px;
+      background:#fff8f0; color:#c0602a; border:1px solid #f5c8a0;
+      font-weight:500;
+    }
 </style>
 </head>
 <body>
@@ -693,6 +703,16 @@
   <div class="section">
     <div class="section-label">Select your items</div>
     <div class="products-grid" id="productsGrid"></div>
+  </div>
+
+  <!-- SpiceBlend Specials -->
+  <div class="section" id="specialsSection">
+    <div class="section-label" style="display:flex;align-items:center;gap:8px;">
+      🌶️ SpiceBlend Specials
+      <span style="font-size:11px;background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:20px;font-weight:600;">Coming Soon</span>
+    </div>
+    <p style="font-size:13px;color:#888;margin:0 0 12px;">Homemade pickles, podi & masala — available for pre-order soon!</p>
+    <div class="products-grid" id="specialsGrid"></div>
   </div>
 
   <!-- Summary -->
@@ -825,6 +845,86 @@ const PRODUCTS = [
     price: 1200,
     img: 'https://github.com/TheSpiceBlend/order-form/blob/main/Chicken_Fry.webp?raw=true',
     soldOut: false
+  },
+];
+
+// ─── Render Specials Grid ───────────────────────────────────────────────────
+const specialsGrid = document.getElementById('specialsGrid');
+SPECIALS.forEach(s => {
+  const el = document.createElement('div');
+  el.className = 'product-item special-item';
+  el.innerHTML = `
+    <img class="product-img" src="${s.img}" alt="${s.name}" style="filter:brightness(0.92)">
+    <div class="product-info">
+      <div class="product-name">${s.name}</div>
+      <div class="product-desc">${s.desc}</div>
+      ${s.options ? `<div class="special-options">${s.options.map(o => `<span class="option-tag">${o}</span>`).join('')}</div>` : ''}
+    </div>
+    <div class="product-right">
+      <div class="product-price" style="color:#aaa;font-size:13px;">Price TBD</div>
+      <div style="font-size:11px;color:#bbb;margin-top:4px;">Coming soon</div>
+    </div>
+  `;
+  specialsGrid.appendChild(el);
+});
+
+// ─── SpiceBlend Specials ────────────────────────────────────────────────────
+const SPECIALS = [
+  {
+    id: 's1',
+    name: 'Sword Fish Pickle 250g',
+    desc: 'Bold, tangy Kerala-style swordfish pickle — a rare coastal delicacy',
+    options: ['Less Salt', 'Less Oil', 'Normal'],
+    img: 'https://images.unsplash.com/photo-1612257999756-7f34a89e5c2c?w=400&q=80',
+  },
+  {
+    id: 's2',
+    name: 'Tuna Fish Pickle 250g',
+    desc: 'Rich tuna pickle with aromatic Kerala spices — pairs perfectly with rice',
+    options: ['Less Salt', 'Less Oil', 'Normal'],
+    img: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&q=80',
+  },
+  {
+    id: 's3',
+    name: 'Prawns Chammanthi Podi 250g',
+    desc: 'Roasted prawn chutney powder — the ultimate sidekick for idli and dosa',
+    img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80',
+  },
+  {
+    id: 's4',
+    name: 'Coconut Chammanthi Podi 250g',
+    desc: 'Classic Kerala roasted coconut chutney powder — smoky, fragrant, addictive',
+    img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80',
+  },
+  {
+    id: 's5',
+    name: 'Chicken Masala 200g',
+    desc: 'Just add onion and salt — everything else is in this spice mix!',
+    img: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400&q=80',
+  },
+  {
+    id: 's6',
+    name: 'Meat Masala 200g',
+    desc: 'A deep, warming Kerala blend perfect for mutton, lamb or beef curries',
+    img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
+  },
+  {
+    id: 's7',
+    name: 'Biriyani Masala 200g',
+    desc: 'Aromatic whole-spice blend for authentic Kerala-style biriyani',
+    img: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80',
+  },
+  {
+    id: 's8',
+    name: 'Dosa & Idly Chammanthi Podi 200g',
+    desc: 'Traditional spiced coconut powder — the perfect breakfast companion',
+    img: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80',
+  },
+  {
+    id: 's9',
+    name: 'Beef Pickle 250g',
+    desc: 'Slow-cooked Kerala nadan beef pickle — spicy, tender, deeply flavoured',
+    img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
   },
 ];
 
