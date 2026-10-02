@@ -138,7 +138,7 @@ export default async function handler(req, res) {
       notes || '',
       itemsSummary,
       `¥${Number(total).toLocaleString()}`,
-      'Received',
+      'Order Confirmed',
       clerkUserId,
     ];
 
