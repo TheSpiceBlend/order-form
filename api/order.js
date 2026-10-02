@@ -246,7 +246,7 @@ export default async function handler(req, res) {
         from: process.env.FROM_EMAIL,
         to: customer.email,
         subject: `Your order is confirmed — ${orderRef} 🍛`,
-        reply_to: process.env.ADMIN_EMAIL,
+        reply_to: (process.env.ADMIN_EMAIL || '').split(',')[0].trim(),
         html: customerEmailHtml,
       }),
     });
