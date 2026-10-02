@@ -268,7 +268,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: process.env.FROM_EMAIL,
-        to: process.env.ADMIN_EMAIL,
+        to: (process.env.ADMIN_EMAIL || '').split(',').map(e => e.trim()).filter(Boolean),
         subject: `New order: ${orderRef} from ${customerName}`,
         html: adminEmailHtml,
       }),
